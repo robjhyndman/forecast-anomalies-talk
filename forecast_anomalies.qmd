@@ -7,27 +7,26 @@ toc: true
 abstract: When a forecast is very inaccurate, it is sometimes because a poor forecasting model is used, but it can also occur when an unusual observation occurs. I will discuss the latter situation, where a good forecasting model can be used to identify anomalies. The approach taken is to use a probabilistic forecast, and to compute the "density scores" equal to the negative log likelihood of the observations based on the forecast distributions. The density scores provide a measure of how anomalous each observation is, given the forecast density. A large density score indicates that the observation is unlikely, and so is a potential anomaly. On the other hand, typical values will have low density scores. A Generalized Pareto Distribution is fitted to the largest density scores to estimate the probability of each observation being an anomaly.  Applications to tourism numbers and mortality data will be used to illustrate the ideas using the weird R package.
 format:
   presentation-beamer: default
+execute:
+  cache: true
+  echo: true
+  warning: false
+  message: false
 ---
 
 ```{r}
 #| label: load-packages
+#| echo: false
+#| include: false
 library(knitr)
 library(fpp3)
 
-# Simplify retail data
-aus_retail <- aus_retail |>
-  select(-`Series ID`)  |>
-  select(Month, State, Industry, Turnover)  |>
-  mutate(State = recode(State,
-    "New South Wales" = "NSW",
-    "Victoria" = "VIC",
-    "Queensland" = "QLD",
-    "South Australia" = "SA",
-    "Western Australia" = "WA",
-    "Tasmania" = "TAS",
-    "Northern Territory" = "NT",
-    "Australian Capital Territory" = "ACT"
-  ))
+# Simplify PBS data
+pbs <- PBS |>
+  group_by(ATC1, ATC2) |>
+  summarise(Scripts = sum(Scripts)) |>
+  ungroup()
+
 # Colours to be viridis for continuous scales and Okabe for discrete scales
 options(
   ggplot2.continuous.colour="viridis",
@@ -37,29 +36,37 @@ options(
 )
 ```
 
-# Australian retail data
-## Australian retail data
+# Australian PBS data
+## Australian PBS data
 \fontsize{10}{11}\sf
 
 ```{r}
-#| label: aus_retail
-aus_retail
+#| label: pbs
+pbs
 ```
 
-## Australian retail data
+
+## Australian PBS data
 \fontsize{10}{11}\sf
 
 ```{r}
-#| label: aus_ets_fits
-fit <- aus_retail |>
-  model(ets = ETS(Turnover))
+#| label: pbs2
+#| echo: false
+pbs  |>
+ filter(ATC1 == "R")  |>
+ select(-ATC1)  |>
+ ggplot(aes(x = Month, y = Scripts, colour  = ATC2)) +
+  geom_line() +
+  facet_grid(ATC2 ~ ., scales = "free_y") +
+  labs(title = "Scripts for ATC1 group R")
 ```
 
-```{r}
-#| label: aus_ets_innov
-augment(fit) |> select(.innov)
-```
+## Main idea
 
+* Look at one-step forecast distributions and compute the anomaly score = $-$ log probability density of the next observation.
+* High anomaly scores indicate potential anomalies.
+* Fit a Generalized Pareto Distribution to the largest anomaly scores.
+* Estimate the probability of each observation being an anomaly.
 
 # Probabilistic forecasts
 
