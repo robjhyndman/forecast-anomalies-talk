@@ -1,0 +1,85 @@
+---
+title: Probabilistic forecasts for anomaly detection
+author: Rob J Hyndman
+date: 3 July 2024
+titlegraphic: bg-06.png
+toc: true
+abstract: When a forecast is very inaccurate, it is sometimes because a poor forecasting model is used, but it can also occur when an unusual observation occurs. I will discuss the latter situation, where a good forecasting model can be used to identify anomalies. The approach taken is to use a probabilistic forecast, and to compute the "density scores" equal to the negative log likelihood of the observations based on the forecast distributions. The density scores provide a measure of how anomalous each observation is, given the forecast density. A large density score indicates that the observation is unlikely, and so is a potential anomaly. On the other hand, typical values will have low density scores. A Generalized Pareto Distribution is fitted to the largest density scores to estimate the probability of each observation being an anomaly.  Applications to tourism numbers and mortality data will be used to illustrate the ideas using the weird R package.
+format:
+  presentation-beamer: default
+---
+
+```{r}
+#| label: load-packages
+library(knitr)
+library(fpp3)
+
+# Simplify retail data
+aus_retail <- aus_retail |>
+  select(-`Series ID`)  |>
+  select(Month, State, Industry, Turnover)  |>
+  mutate(State = recode(State,
+    "New South Wales" = "NSW",
+    "Victoria" = "VIC",
+    "Queensland" = "QLD",
+    "South Australia" = "SA",
+    "Western Australia" = "WA",
+    "Tasmania" = "TAS",
+    "Northern Territory" = "NT",
+    "Australian Capital Territory" = "ACT"
+  ))
+# Colours to be viridis for continuous scales and Okabe for discrete scales
+options(
+  ggplot2.continuous.colour="viridis",
+  ggplot2.continuous.fill = "viridis",
+  ggplot2.discrete.colour = c("#D55E00", "#0072B2","#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#F0E442"),
+  ggplot2.discrete.fill = c("#D55E00", "#0072B2","#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#F0E442")
+)
+```
+
+# Australian retail data
+## Australian retail data
+\fontsize{10}{11}\sf
+
+```{r}
+#| label: aus_retail
+aus_retail
+```
+
+## Australian retail data
+\fontsize{10}{11}\sf
+
+```{r}
+#| label: aus_ets_fits
+fit <- aus_retail |>
+  model(ets = ETS(Turnover))
+```
+
+```{r}
+#| label: aus_ets_innov
+augment(fit) |> select(.innov)
+```
+
+
+# Probabilistic forecasts
+
+## Probabilistic forecasts
+
+- Describe probabilistic forecasts
+
+# Extreme log scores
+
+## Extreme log scores
+
+- Explain log scores and EVT approach to finding anomalies ala lookout
+
+# Using the fable and weird packages
+
+## Using the fable and weird packages
+
+- Demonstrate using weird package with (a) univariate models for tourism data; and (b) univariate models for age-specific time series from French mortality.
+
+# Online anomaly detection
+## Online anomaly detection
+
+- Need to compute one-step forecast distributions using prior data. Approximately the same as N(y-hat, sigma^2) using in-sample fit. More accurate using stretch tsibble with one-step forecasts.
