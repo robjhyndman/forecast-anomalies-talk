@@ -11,7 +11,7 @@ format:
       opts_chunk:
         dev: "CairoPDF"
 execute:
-  cache: true
+  cache: false
   echo: true
   warning: false
   message: false
@@ -22,17 +22,9 @@ execute:
 #| echo: false
 #| include: false
 library(knitr)
+library(targets)
 library(fpp3)
-library(weird)
-library(distributional)
-source("density_scores.R")
-
-# Simplify PBS data
-pbs <- PBS |>
-  group_by(ATC2) |>
-  summarise(Scripts = sum(Scripts)) |>
-  ungroup() |> 
-  filter(substr(ATC2, 1, 1) %in% c("G", "R"))
+tar_load(c("pbs", "pbs_stretch", "pbs_fit", "pbs_fc", "pbs_scores"))
 
 # Colours to be viridis for continuous scales and Okabe for discrete scales
 options(
@@ -44,7 +36,7 @@ options(
   ggplot2.discrete.fill = c("#D55E00", "#0072B2", "#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#F0E442")
 )
 # Fira Sans font for graphics to match the main text
-ggplot2::theme_set(ggplot2::theme_get() + ggplot2::theme(text = ggplot2::element_text(family = 'Fira Sans')))
+ggplot2::theme_set(ggplot2::theme_get() + ggplot2::theme(text = ggplot2::element_text(family = "Fira Sans")))
 ```
 
 # Australian PBS data
@@ -63,12 +55,7 @@ pbs
 ```{r}
 #| label: pbs2
 #| echo: false
-pbs  |>
- filter(substr(ATC2, 1, 1) == "R")  |>
- ggplot(aes(x = Month, y = Scripts, colour  = ATC2)) +
-  geom_line() +
-  facet_grid(ATC2 ~ ., scales = "free_y") +
-  labs(title = "Scripts for ATC group R")
+tar_read(rplots)
 ```
 
 ## Main idea
@@ -80,76 +67,6 @@ pbs  |>
 * Estimate the probability of each observation being an anomaly.
 
 ## Anomaly score distribution
-
-```{r}
-#| label: distribution_plots
-#| echo: false
-#| include: false
-density_plot <- function(df, fill) {
-  miny <- min(df$y)
-  maxy <- max(df$y)
-  bind_rows(
-      tibble(y = miny, fy = 0),
-      df,
-      tibble(y = maxy, fy = 0),
-    ) |>
-    ggplot(aes(y, fy)) +
-    geom_polygon(fill = fill) +
-    theme(
-      axis.text.x = element_blank(),
-      axis.ticks.x = element_blank(),
-      axis.text.y = element_blank(),
-      axis.ticks.y = element_blank()
-    )
-}
-savepng <- function(p, file) {
-  file <- here::here("figures", file)
-  png(file, width = 12, height = 6, units="cm", res=300, type="cairo-png")
-  print(p)
-  crop::dev.off.crop(file)
-}
-# One-step forecast distribution
-p <- tibble(
-    y = seq(-4,4,l=501),
-    fy = dnorm(y)
-  ) |>
-  density_plot(fill = "#e67540") +
-  labs(
-    y = "f(y)",
-    title = "One-step forecast density"
-  )
-savepng(p, "n01.png")
-# Anomaly score distribution
-u <- 0.5*qchisq(0.95, df = 1) + 0.5*log(2*pi)
-p <- tibble(
-    y = seq(0, 8, l=501),
-    fy = 0.5*dchisq(y, df = 1)
-  ) |>
-  density_plot(fill = "#94a8df") +
-  labs(
-    x = "s",
-    y = "f(s)",
-    title = "Anomaly score density"
-  ) +
-  geom_vline(xintercept = u, linetype = "dashed") +
-  annotate("text", x = u+0.1, y = 0.15, label = "95% quantile", vjust = 1, hjust = 0)
-savepng(p, "as.png")
-# Exeedance distribution about 95% quantile
-p <- tibble(
-    y = c(0,u,seq(u, 8, l=501)),
-    fy = c(0,0, 0.5*dchisq(y[-(1:2)], df = 1))
-  ) |>
-  density_plot(fill = "#94a8df") +
-  labs(
-    x = "s",
-    y = "f(s | s>u)",
-    title = "Anomaly score exceedance density"
-  ) +
-  geom_vline(xintercept = u, linetype = "dashed") +
-  scale_x_continuous(breaks = u, labels = "u") + theme(axis.text.x = element_text())
-p <- savepng(p, "ase.png")
-```
-
 
 \only<1-4>{\begin{textblock}{10}(0.2,2)\fontsize{13}{14}\sf
 Suppose one-step forecasts are $N(\mu_t, \sigma^2)$.
@@ -184,40 +101,23 @@ Extreme value theory shows that the Generalized Pareto distribution is a good ap
 ```{r}
 #| label: tscvplots
 #| echo: false
-tscv_plot <- function(.init, .step, h = 1) {
-  expand.grid(
-    time = seq(26),
-    .id = seq(trunc(11 / .step))
-  ) |>
-    group_by(.id) |>
-    mutate(
-      observation = case_when(
-        time <= ((min(.id) - 1) * .step + .init) ~ "train",
-        time %in% c((min(.id) - 1) * .step + .init + h) ~ "test",
-        TRUE ~ "unused"
-      )
-    ) |>
-    ungroup() |>
-    filter(.id <= 26 - .init) |>
-    ggplot(aes(x = time, y = .id)) +
-    geom_segment(
-      aes(x = 0, xend = 27, y = .id, yend = .id),
-      arrow = arrow(length = unit(0.015, "npc")),
-      col = "black", linewidth = .25
-    ) +
-    geom_point(aes(col = observation), size = 2) +
-    scale_y_reverse() +
-    scale_color_manual(values = c(train = "#0072B2", test = "#D55E00", unused = "gray")) +
-    guides(col = "none") +
-    labs(x = "time", y = "") +
-    theme_void() +
-    theme(axis.title.x = element_text(margin = margin(t = 2))) +
-    theme(text = ggplot2::element_text(family = 'Fira Sans'))
-}
+tar_read(tscvplot)
+```
 
-tscv_plot(.init = 8, .step = 1, h = 1) +
-  annotate("text", x = 21, y = 0, label = "h = 1",
-    color = "#D55E00", family = 'Fira Sans')
+## Rolling origin forecasts
+\fontsize{10}{11}\sf
+
+```{r}
+#| label: pbsstretch
+#| echo: true
+#| eval: false
+pbs_stretch <- stretch_tsibble(pbs, .step = 1, .init = 36)
+```
+
+```{r}
+#| label: pbsstretch2
+#| echo: false
+pbs_stretch
 ```
 
 ## Rolling origin forecasts
@@ -226,9 +126,14 @@ tscv_plot(.init = 8, .step = 1, h = 1) +
 ```{r}
 #| label: pbsfit
 #| echo: true
-stretch_pbs <- stretch_tsibble(pbs, .step = 1, .init = 192)
-fit <- stretch_pbs |> model(ets = ETS(Scripts))
-fit
+#| eval: false
+pbs_fit <- pbs_stretch |> model(ets = ETS(Scripts))
+```
+
+```{r}
+#| label: pbsfit2
+#| echo: false
+pbs_fit
 ```
 
 ## Rolling origin forecasts
@@ -237,8 +142,15 @@ fit
 ```{r}
 #| label: pbsfc
 #| echo: true
-fc <- forecast(fit, h=1) 
-fc
+#| eval: false
+pbs_fc <- forecast(pbs_fit, h = 1)
+```
+
+```{r}
+#| label: pbsfc2
+#| echo: false
+#| eval: true
+pbs_fc
 ```
 
 ## Finding anomalies
@@ -247,17 +159,29 @@ fc
 ```{r}
 #| label: pbs_scores
 #| echo: true
-scores <- fc |> 
-  select(-.model, -.mean) |> 
-  left_join(pbs |> rename(actual = Scripts), by = c("ATC2", "Month")) |> 
+#| eval: false
+pbs_scores <- pbs_fc |>
+  left_join(pbs |> rename(actual = Scripts), by = c("ATC2", "Month")) |>
   mutate(
     s = -log_likelihood(Scripts, actual), # Density scores
-    prob = lookout(density_scores = s)   # Probability of anomaly
+    prob = lookout(density_scores = s)    # Probability not an anomaly
   )
-scores
 ```
 
+```{r}
+#| label: pbs_scores2
+#| echo: false
+#| eval: true
+pbs_scores
+```
 
+## Finding anomalies
+
+```{r}
+#| label: pbs_scores3
+pbs_scores |> filter(prob < 0.05)
+pbs |> filter(ATC2 == "R03") |> autoplot()
+```
 
 ## Online anomaly detection
 
