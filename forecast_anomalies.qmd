@@ -3,10 +3,13 @@ title: Probabilistic forecasts for anomaly detection
 author: Rob J Hyndman
 date: 3 July 2024
 titlegraphic: bg-06.png
-toc: true
+toc: false
 abstract: When a forecast is very inaccurate, it is sometimes because a poor forecasting model is used, but it can also occur when an unusual observation occurs. I will discuss the latter situation, where a good forecasting model can be used to identify anomalies. The approach taken is to use a probabilistic forecast, and to compute the "density scores" equal to the negative log likelihood of the observations based on the forecast distributions. The density scores provide a measure of how anomalous each observation is, given the forecast density. A large density score indicates that the observation is unlikely, and so is a potential anomaly. On the other hand, typical values will have low density scores. A Generalized Pareto Distribution is fitted to the largest density scores to estimate the probability of each observation being an anomaly.  Applications to tourism numbers and mortality data will be used to illustrate the ideas using the weird R package.
 format:
-  presentation-beamer: default
+  presentation-beamer: 
+    knitr:
+      opts_chunk:
+        dev: "CairoPDF"
 execute:
   cache: true
   echo: true
@@ -20,20 +23,28 @@ execute:
 #| include: false
 library(knitr)
 library(fpp3)
+library(weird)
+library(distributional)
+source("density_scores.R")
 
 # Simplify PBS data
 pbs <- PBS |>
-  group_by(ATC1, ATC2) |>
+  group_by(ATC2) |>
   summarise(Scripts = sum(Scripts)) |>
-  ungroup()
+  ungroup() |> 
+  filter(substr(ATC2, 1, 1) %in% c("G", "R"))
 
 # Colours to be viridis for continuous scales and Okabe for discrete scales
 options(
-  ggplot2.continuous.colour="viridis",
+  digits = 3,
+  width = 70,
+  ggplot2.continuous.colour = "viridis",
   ggplot2.continuous.fill = "viridis",
-  ggplot2.discrete.colour = c("#D55E00", "#0072B2","#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#F0E442"),
-  ggplot2.discrete.fill = c("#D55E00", "#0072B2","#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#F0E442")
+  ggplot2.discrete.colour = c("#D55E00", "#0072B2", "#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#F0E442"),
+  ggplot2.discrete.fill = c("#D55E00", "#0072B2", "#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#F0E442")
 )
+# Fira Sans font for graphics to match the main text
+ggplot2::theme_set(ggplot2::theme_get() + ggplot2::theme(text = ggplot2::element_text(family = 'Fira Sans')))
 ```
 
 # Australian PBS data
@@ -53,40 +64,202 @@ pbs
 #| label: pbs2
 #| echo: false
 pbs  |>
- filter(ATC1 == "R")  |>
- select(-ATC1)  |>
+ filter(substr(ATC2, 1, 1) == "R")  |>
  ggplot(aes(x = Month, y = Scripts, colour  = ATC2)) +
   geom_line() +
   facet_grid(ATC2 ~ ., scales = "free_y") +
-  labs(title = "Scripts for ATC1 group R")
+  labs(title = "Scripts for ATC group R")
 ```
 
 ## Main idea
 
-* Look at one-step forecast distributions and compute the anomaly score = $-$ log probability density of the next observation.
+* Estimate one-step forecast densities: $f(y | y_1,\dots,y_{t-1})$.
+* Anomaly score: $s_{t} = -\hat{f}(y_{t}| y_1,\dots,y_{t-1})$.
 * High anomaly scores indicate potential anomalies.
-* Fit a Generalized Pareto Distribution to the largest anomaly scores.
+* Fit a Generalized Pareto Distribution to the top 5% of anomaly scores.
 * Estimate the probability of each observation being an anomaly.
 
-# Probabilistic forecasts
+## Anomaly score distribution
 
-## Probabilistic forecasts
+```{r}
+#| label: distribution_plots
+#| echo: false
+#| include: false
+density_plot <- function(df, fill) {
+  miny <- min(df$y)
+  maxy <- max(df$y)
+  bind_rows(
+      tibble(y = miny, fy = 0),
+      df,
+      tibble(y = maxy, fy = 0),
+    ) |>
+    ggplot(aes(y, fy)) +
+    geom_polygon(fill = fill) +
+    theme(
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+}
+savepng <- function(p, file) {
+  file <- here::here("figures", file)
+  png(file, width = 12, height = 6, units="cm", res=300, type="cairo-png")
+  print(p)
+  crop::dev.off.crop(file)
+}
+# One-step forecast distribution
+p <- tibble(
+    y = seq(-4,4,l=501),
+    fy = dnorm(y)
+  ) |>
+  density_plot(fill = "#e67540") +
+  labs(
+    y = "f(y)",
+    title = "One-step forecast density"
+  )
+savepng(p, "n01.png")
+# Anomaly score distribution
+u <- 0.5*qchisq(0.95, df = 1) + 0.5*log(2*pi)
+p <- tibble(
+    y = seq(0, 8, l=501),
+    fy = 0.5*dchisq(y, df = 1)
+  ) |>
+  density_plot(fill = "#94a8df") +
+  labs(
+    x = "s",
+    y = "f(s)",
+    title = "Anomaly score density"
+  ) +
+  geom_vline(xintercept = u, linetype = "dashed") +
+  annotate("text", x = u+0.1, y = 0.15, label = "95% quantile", vjust = 1, hjust = 0)
+savepng(p, "as.png")
+# Exeedance distribution about 95% quantile
+p <- tibble(
+    y = c(0,u,seq(u, 8, l=501)),
+    fy = c(0,0, 0.5*dchisq(y[-(1:2)], df = 1))
+  ) |>
+  density_plot(fill = "#94a8df") +
+  labs(
+    x = "s",
+    y = "f(s | s>u)",
+    title = "Anomaly score exceedance density"
+  ) +
+  geom_vline(xintercept = u, linetype = "dashed") +
+  scale_x_continuous(breaks = u, labels = "u") + theme(axis.text.x = element_text())
+p <- savepng(p, "ase.png")
+```
 
-- Describe probabilistic forecasts
 
-# Extreme log scores
+\only<1-4>{\begin{textblock}{10}(0.2,2)\fontsize{13}{14}\sf
+Suppose one-step forecasts are $N(\mu_t, \sigma^2)$.
+\end{textblock}
+\placefig{10.5}{1.2}{width = 5.1cm}{figures/n01.png}}
 
-## Extreme log scores
+\only<2-4>{\begin{textblock}{10}(0.2,4.2)\fontsize{13}{14}\sf
+Then $s_t = -\log \phi\left(\frac{y_t - \mu_t}{\sigma}\right) = \frac{1}{2}\left(\frac{y_t - \mu_t}{\sigma}\right)^2 + \frac{1}{2}\log(2\pi\sigma^2)$
 
-- Explain log scores and EVT approach to finding anomalies ala lookout
+So anomaly scores have distribution: $S \sim \frac12 \chi^2_1 + c$
+\end{textblock}
+\placefig{10.5}{3.8}{width = 5.1cm}{figures/as.png}
+}
 
-# Using the fable and weird packages
+\only<3-4>{\begin{textblock}{10}(0.2,6.8)\fontsize{13}{14}\sf
+Conditional probability distribution of scores above threshold $u$ is Generalized Pareto:\vspace*{0.15cm}
 
-## Using the fable and weird packages
+\centerline{$H(x) = P(S \le u + x \mid S > u) = 1 - (1 + \xi x/v)^{-1/\xi}$}
+\end{textblock}
+\placefig{10.5}{6.4}{width = 5.1cm}{figures/ase.png}
+}
 
-- Demonstrate using weird package with (a) univariate models for tourism data; and (b) univariate models for age-specific time series from French mortality.
+\only<4>{\begin{textblock}{9.7}(0.35,1.7)
+\fontsize{14}{19}\sf
+\begin{alertblock}{}
+Extreme value theory shows that the Generalized Pareto distribution is a good approximation to the distribution of the largest anomaly scores for almost all possible forecast distributions.
+\end{alertblock}
+\end{textblock}}
 
-# Online anomaly detection
+## Rolling origin forecasts
+
+```{r}
+#| label: tscvplots
+#| echo: false
+tscv_plot <- function(.init, .step, h = 1) {
+  expand.grid(
+    time = seq(26),
+    .id = seq(trunc(11 / .step))
+  ) |>
+    group_by(.id) |>
+    mutate(
+      observation = case_when(
+        time <= ((min(.id) - 1) * .step + .init) ~ "train",
+        time %in% c((min(.id) - 1) * .step + .init + h) ~ "test",
+        TRUE ~ "unused"
+      )
+    ) |>
+    ungroup() |>
+    filter(.id <= 26 - .init) |>
+    ggplot(aes(x = time, y = .id)) +
+    geom_segment(
+      aes(x = 0, xend = 27, y = .id, yend = .id),
+      arrow = arrow(length = unit(0.015, "npc")),
+      col = "black", linewidth = .25
+    ) +
+    geom_point(aes(col = observation), size = 2) +
+    scale_y_reverse() +
+    scale_color_manual(values = c(train = "#0072B2", test = "#D55E00", unused = "gray")) +
+    guides(col = "none") +
+    labs(x = "time", y = "") +
+    theme_void() +
+    theme(axis.title.x = element_text(margin = margin(t = 2))) +
+    theme(text = ggplot2::element_text(family = 'Fira Sans'))
+}
+
+tscv_plot(.init = 8, .step = 1, h = 1) +
+  annotate("text", x = 21, y = 0, label = "h = 1",
+    color = "#D55E00", family = 'Fira Sans')
+```
+
+## Rolling origin forecasts
+\fontsize{10}{11}\sf
+
+```{r}
+#| label: pbsfit
+#| echo: true
+stretch_pbs <- stretch_tsibble(pbs, .step = 1, .init = 192)
+fit <- stretch_pbs |> model(ets = ETS(Scripts))
+fit
+```
+
+## Rolling origin forecasts
+\fontsize{10}{11}\sf
+
+```{r}
+#| label: pbsfc
+#| echo: true
+fc <- forecast(fit, h=1) 
+fc
+```
+
+## Finding anomalies
+\fontsize{10}{11}\sf
+
+```{r}
+#| label: pbs_scores
+#| echo: true
+scores <- fc |> 
+  select(-.model, -.mean) |> 
+  left_join(pbs |> rename(actual = Scripts), by = c("ATC2", "Month")) |> 
+  mutate(
+    s = -log_likelihood(Scripts, actual), # Density scores
+    prob = lookout(density_scores = s)   # Probability of anomaly
+  )
+scores
+```
+
+
+
 ## Online anomaly detection
 
-- Need to compute one-step forecast distributions using prior data. Approximately the same as N(y-hat, sigma^2) using in-sample fit. More accurate using stretch tsibble with one-step forecasts.
+
+- Demonstrate using weird package with (a) univariate models for tourism data; and (b) univariate models for age-specific time series from French mortality.
