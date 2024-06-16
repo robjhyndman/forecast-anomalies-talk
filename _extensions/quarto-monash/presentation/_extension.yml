@@ -14,7 +14,7 @@ contributes:
       aspectratio: 169
       fontsize: 14pt
       section-titles: false
-      pdf-engine: pdflatex
+      pdf-engine: xelatex
       fig-width: 9
       fig-height: 4.5
       titlegraphic: bg-02.png
@@ -31,10 +31,12 @@ contributes:
         data-background-position: "center"
       theme: [default, revealjs/monash.scss]
       logo: _images/logo/monash-stacked-blue-rgb-transparent.png
+      html-math-method: katex
     revealjs+letterbox:
       width: 1280
       height: 720
       self-contained: true
+      html-math-method: katex
       title-slide-attributes:
         data-background-image: "_images/background/bg-02.png"
         data-background-size: "contain"

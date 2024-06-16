@@ -1,10 +1,11 @@
 /*-- scss:defaults --*/
 
-@import url(https://fonts.googleapis.com/css?family=News+Cycle:400,700);
-@import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic);
+@import url(https://fonts.googleapis.com/css?family=Fira+Sans:400,700,400italic,700italic);
+@import url(https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700,400italic,700italic);
 
 // fonts
-$font-family-sans-serif: Lato, sans-serif !default;
+$font-family-sans-serif: Fira+Sans, sans-serif !default;
+$font-family-monospace: Source+Code+Pro, monospace, !default;
 
 // colors
 $body-bg: #fff !default;
@@ -13,7 +14,8 @@ $link-color: #00008b !default;
 $selection-bg: rgba(0, 0, 0, 0.99);
 
 // headings
-$presentation-heading-font: "News Cycle", sans-serif !default;
+$presentation-heading-font: "Fira+Sans", sans-serif !default;
+$presentation-h1-font-size: 2.0em;
 
 // title slide
 $presentation-title-slide-text-align: left !default;
@@ -44,7 +46,7 @@ $presentation-title-slide-text-align: left !default;
   .quarto-title-authors {
     display: flex;
     justify-content: left;
-  
+
     .quarto-title-author {
       padding-left: 0em;
       padding-right: 0em;
@@ -274,5 +276,3 @@ Secondary colours are to be used:
 .monash-umber2, .monash-umber2 code, .monash-umber2 a { color: #795549!important; }
 .monash-olive2, .monash-olive2 code, .monash-olive2 a { color: #6F7C4D!important; }
 .monash-green2, .monash-green2 code, .monash-green2 a { color: #008A25!important; }
-
-

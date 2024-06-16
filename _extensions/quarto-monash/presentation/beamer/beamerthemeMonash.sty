@@ -7,14 +7,11 @@
 \beamer@centeredfalse
 
 % Fonts
-%\usepackage[scale=0.85,lf]{FiraMono}
-\usepackage[scale=0.85]{sourcecodepro}
-\usepackage[lf,t]{FiraSans}
-\fontsize{13}{15}\sf
-%\DisableLigatures{encoding = T1, family = tt*}
+\usepackage[fira]{fontsetup}
+\setmonofont[Scale=0.85]{SourceCodePro-Regular.otf}
+\def\verbatim@font{\fontsize{10}{10}\tt}%
 
 %% Colors
-
 \definecolor{DarkGrey}{RGB}{100,100,100}
 \definecolor{DarkYellow}{RGB}{230, 172, 0}
 \definecolor{grey}{RGB}{191,191,191}
@@ -119,7 +116,7 @@
 % Redefine shaded environment if it exists (for R plots)
 \ifcsname Shaded\endcsname
   \definecolor{shadecolor}{RGB}{225,225,225}
-  \renewenvironment{Shaded}{\color{black}\begin{snugshade}\color{black}}{\end{snugshade}}
+  \renewenvironment{Shaded}{\color{black}\fontsize{10}{10}\sf\begin{snugshade}\color{black}}{\end{snugshade}}
 \fi
 
 \setbeamertemplate{footline}{%

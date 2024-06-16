@@ -41,16 +41,13 @@ ggplot2::theme_set(ggplot2::theme_get() + ggplot2::theme(text = ggplot2::element
 
 # Australian PBS data
 ## Australian PBS data
-\fontsize{10}{11}\sf
 
 ```{r}
 #| label: pbs
 pbs
 ```
 
-
 ## Australian PBS data
-\fontsize{10}{11}\sf
 
 ```{r}
 #| label: pbs2
@@ -89,8 +86,8 @@ Conditional probability distribution of scores above threshold $u$ is Generalize
 \placefig{10.5}{6.4}{width = 5.1cm}{figures/ase.png}
 }
 
-\only<4>{\begin{textblock}{9.7}(0.35,1.7)
-\fontsize{14}{19}\sf
+\only<4>{\begin{textblock}{9.7}(0.35,1.75)
+\fontsize{14}{20}\sf
 \begin{alertblock}{}
 Extreme value theory shows that the Generalized Pareto distribution is a good approximation to the distribution of the largest anomaly scores for almost all possible forecast distributions.
 \end{alertblock}
@@ -105,7 +102,6 @@ tar_read(tscvplot)
 ```
 
 ## Rolling origin forecasts
-\fontsize{10}{11}\sf
 
 ```{r}
 #| label: pbsstretch
@@ -121,7 +117,6 @@ pbs_stretch
 ```
 
 ## Rolling origin forecasts
-\fontsize{10}{11}\sf
 
 ```{r}
 #| label: pbsfit
@@ -137,7 +132,6 @@ pbs_fit
 ```
 
 ## Rolling origin forecasts
-\fontsize{10}{11}\sf
 
 ```{r}
 #| label: pbsfc
@@ -154,7 +148,6 @@ pbs_fc
 ```
 
 ## Finding anomalies
-\fontsize{10}{11}\sf
 
 ```{r}
 #| label: pbs_scores
@@ -176,7 +169,6 @@ pbs_scores
 ```
 
 ## Finding anomalies
-\fontsize{10}{11}\sf
 
 ```{r}
 #| label: pbs_scores3
