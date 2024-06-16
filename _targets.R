@@ -99,6 +99,7 @@ list(
   ),
   tar_quarto(
     name = slides,
-    path = "forecast_anomalies.qmd"
+    path = "forecast_anomalies.qmd",
+    extra_files = "before-title.tex"
   )
 )
