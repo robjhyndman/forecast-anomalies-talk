@@ -174,11 +174,29 @@ pbs_scores
 
 ```{r}
 #| label: pbs_scores3
-pbs_scores |> filter(prob < 0.05)
-pbs |> filter(ATC2 == "R03") |> autoplot()
+pbs_scores |> arrange(prob)
+```
+
+## Finding anomalies
+
+```{r}
+#| label: pbs_scores4
+#| fig-height: 3.7
+pbs |> filter(ATC2 == "N07") |> autoplot() +
+  scale_x_yearmonth(date_breaks = "2 years", date_labels = "%Y") +
+  geom_vline(xintercept = as.Date("2001-02-01"), color = "red")
+```
+
+## Finding anomalies
+
+```{r}
+#| label: pbs_scores5
+#| fig-height: 3.7
+pbs |> filter(ATC2 == "R06") |> autoplot() +
+  scale_x_yearmonth(date_breaks = "2 years", date_labels = "%Y") +
+  geom_vline(xintercept = as.Date(c("1998-02-01","1999-01-01")), color = "red")
 ```
 
 ## Online anomaly detection
-
 
 - Demonstrate using weird package with (a) univariate models for tourism data; and (b) univariate models for age-specific time series from French mortality.
