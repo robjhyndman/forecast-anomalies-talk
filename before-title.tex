@@ -1,0 +1,39 @@
+\usetheme{Monash}
+
+$if(toc)$
+% Outline at start of each section
+\AtBeginSection[]{
+   \begin{frame}{Outline}\vspace*{0.7cm}
+   \tableofcontents[currentsection,hideallsubsections]
+   \end{frame}
+  }
+$endif$
+
+
+% Monash title page
+% One can alter the font size by setting eg 'titlefontsize: 20pt' in the YAML header
+\setbeamerfont{title}{series=\bfseries,parent=structure,size=\fontsize{22}{28}}
+\setbeamertemplate{title page}
+{\placefig{-0.01}{-0.01}{width=1.01\paperwidth,height=1.01\paperheight}{$titlegraphic$}
+\begin{textblock}{8.7}(1,2.8)\usebeamerfont{title}
+{\color{$titlecolor$}\raggedright\par\inserttitle}
+\end{textblock}
+\begin{textblock}{8.7}(1,6.8)
+{\color{$titlecolor$}\raggedright{\insertauthor}\mbox{}\\[0.2cm]
+\insertdate}
+\end{textblock}}
+
+% Find images
+\graphicspath{{_extensions/quarto-monash/presentation/_images/background/}{figures/}}
+
+% Change Monash Blue to match title page
+\definecolor{MonashBlue}{HTML}{006CAD}
+
+% Ligatured coding font
+\setmonofont[Scale = 0.85]{Hack Nerd Font JBM Ligatured CCG}
+% For some reason, this makes <- appear ligatured in code
+\makeatletter
+\def\verbatim@nolig@list{}
+\makeatother
+
+\relax
