@@ -16,13 +16,19 @@ list(
       ungroup()
   ),
   tar_target(
+    # Fira Sans font for graphics
+    name = ggfont,
+    command = ggplot2::theme(text = ggplot2::element_text(family = "Fira Sans"))
+  ),
+  tar_target(
     name = rplots,
     command = pbs  |>
       filter(substr(ATC2, 1, 1) == "R")  |>
       ggplot(aes(x = Month, y = Scripts, colour  = ATC2)) +
       geom_line() +
       facet_grid(ATC2 ~ ., scales = "free_y") +
-      labs(title = "Scripts for ATC group R")
+      labs(title = "Scripts for ATC group R") +
+      ggfont
   ),
   tar_target(# One-step forecast distribution
     name = p1,
@@ -31,7 +37,8 @@ list(
       labs(
         y = "f(y)",
         title = "One-step forecast density"
-      )
+      ) +
+      ggfont
   ),
   tar_target(# Anomaly score threshold
     name = u,
@@ -50,7 +57,8 @@ list(
         title = "Anomaly score density"
       ) +
       geom_vline(xintercept = u, linetype = "dashed") +
-      annotate("text", x = u+0.1, y = 0.15, label = "95% quantile", vjust = 1, hjust = 0)
+      annotate("text", x = u+0.1, y = 0.15, label = "95% quantile", vjust = 1, hjust = 0) +
+      ggfont
   ),
   tar_target(# Exceedance distribution about 95% quantile
     name = p3,
@@ -65,7 +73,8 @@ list(
         title = "Anomaly score exceedance density"
       ) +
       geom_vline(xintercept = u, linetype = "dashed") +
-      scale_x_continuous(breaks = u, labels = "u") + theme(axis.text.x = element_text())
+      scale_x_continuous(breaks = u, labels = "u") + theme(axis.text.x = element_text()) +
+      ggfont
   ),
   tar_target(name = n01, command = savepng(p1, "n01.png")),
   tar_target(name = as, command =  savepng(p2, "as.png")),
