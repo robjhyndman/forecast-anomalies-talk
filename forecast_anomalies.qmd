@@ -41,7 +41,6 @@ options(
 ggplot2::theme_set(ggplot2::theme_get() + ggplot2::theme(text = ggplot2::element_text(family = "Fira Sans")))
 ```
 
-# Australian PBS data
 ## Australian PBS data
 
 ```{r}
@@ -59,16 +58,17 @@ tar_read(rplots)
 
 ## Main idea
 
-* Estimate one-step forecast densities: $f(y | y_1,\dots,y_{t-1})$.
-* Anomaly score: $s_{t} = -\hat{f}(y_{t}| y_1,\dots,y_{t-1})$.
+* Estimate one-step forecast densities: $f(y_t | y_1,\dots,y_{t-1})$.
+* Anomaly score: $s_{t} = -\log\hat{f}(y_{t}| y_1,\dots,y_{t-1})$.
 * High anomaly scores indicate potential anomalies.
 * Fit a Generalized Pareto Distribution to the top 5% of anomaly scores.
-* Estimate the probability of each observation being an anomaly.
+* Use the GPD to estimate the probability of each observation being an anomaly.
 
 ## Anomaly score distribution
 
 \only<1-4>{\begin{textblock}{10}(0.2,2)\fontsize{13}{14}\sf
-Suppose one-step forecasts are $N(\mu_t, \sigma^2)$.
+Suppose one-step forecasts are $N(\mu_t, \sigma^2)$. \\
+So $f(y_t | y_1,\dots,y_{t-1}) = \phi\left(\frac{y_t - \mu_t}{\sigma}\right)$
 \end{textblock}
 \placefig{10.5}{1.2}{width = 5.1cm}{figures/n01.png}}
 
@@ -94,6 +94,32 @@ Conditional probability distribution of scores above threshold $u$ is Generalize
 Extreme value theory shows that the Generalized Pareto distribution is a good approximation to the distribution of the largest anomaly scores for almost all possible forecast distributions.
 \end{alertblock}
 \end{textblock}}
+
+## Fisher-Tippett-Gnedenko Theorem {-}
+
+$M_n = \max \{Y_1, \dots, Y_n\}$ where $Y_1, \dots, Y_n \sim$ iid $F$.
+
+Under some conditions, as $n\rightarrow\infty$,\newline $M_n$ converges in distribution to
+\begin{align*}
+  &\textbf{Weibull:} && \text{when $F$ has a finite upper bound (e.g., Uniform)} \\
+  &\textbf{Gumbel:}  && \text{when $F$ has exponential tails (e.g., Normal or Gamma)} \\
+  &\textbf{Fréchet:} && \text{when $F$ has heavy tails (e.g., Pareto or Weibull)}
+\end{align*}
+
+## Generalized Pareto distribution
+
+**Peaks Over Threshold (POT)**:  extremes are observations $>u$.
+
+Probability distribution of extremes::
+$$
+  H(y) = P\left \{Y \leq u + y \mid Y > u \right \}
+  = \frac{ F(u+y) - F(u)}{1 - F(u)}.
+$$
+When $F$ satisfies conditions of FTG theorem, then $H$ is **Generalized Pareto Distribution** (GPD):
+$$
+  H(y) \approx 1 - ( 1 + \xi y/v )^{-1/\xi} ,
+$$
+where $\{y: y >0 \text{ and } (1 + \xi y)/v >0 \}$.
 
 ## Rolling origin forecasts
 
