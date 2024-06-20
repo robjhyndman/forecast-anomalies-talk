@@ -75,7 +75,7 @@ tar_read(rplots)
 \placefig{10.8}{3.8}{width = 5.1cm}{figures/as.png}
 }
 
-\begin{textblock}{10.2}(0.3,6.2)
+\only<3>{\begin{textblock}{10.2}(0.3,6.2)
 \begin{alertblock}{Extreme anomaly score distribution}
 \centerline{$H(x) = P(S \le u + x \mid S > u)$}
 \begin{itemize}\tightlist
@@ -84,8 +84,9 @@ tar_read(rplots)
 \end{alertblock}
 \end{textblock}
 \placefig{10.8}{6.4}{width = 5.1cm}{figures/ase.png}
+}
 
-## Extreme anomaly scores
+## Anomaly detection algorithm
 
 * Estimate one-step forecast densities: $f(y_t | y_1,\dots,y_{t-1})$.
 * Anomaly score: $s_{t} = -\log\hat{f}(y_{t}| y_1,\dots,y_{t-1})$.
@@ -115,12 +116,12 @@ fc <- n07 |> model(ets = ETS(Scripts)) |> forecast(h = 1)
 fc |> autoplot(n07plus)
 ```
 
-\only<2>{\begin{textblock}{9}(2.2,3.2)\fontsize{12}{13}\sf
+\only<2>{\begin{textblock}{9.5}(2.2,3.2)\fontsize{12}{13}\sf
 \begin{alertblock}{}
-Forecast distribution: $N(4261, 136066)$\\
-Actual: $y_t = 24616$\\
-Anomaly score: $s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = 1529$
-Probability of anomaly: $P(S > s_t | S > q_{0.95}) = 0.000925$
+Forecast distribution:\hfill $N(4261, 369^2)$\\
+Actual:\hfill $y_t = 24616$\\
+Anomaly score:\hfill $s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = 1529$
+Probability of anomaly:\hfill $P(S > s_t | S > q_{0.95}) = 0.0009$
 \end{alertblock}
 \end{textblock}
 }
