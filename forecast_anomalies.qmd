@@ -56,7 +56,36 @@ pbs
 tar_read(rplots)
 ```
 
-## Main idea
+## Anomaly score distribution
+\fontsize{12.5}{14}\sf
+
+\only<1-3>{\begin{textblock}{10.2}(0.3,1.05)
+\begin{block}{One-step forecast distribution: $N(\mu_t, \sigma^2)$}
+\centerline{$\displaystyle f(y_t | y_1,\dots,y_{t-1}) = \phi\left(\frac{y_t - \mu_t}{\sigma}\right) = \frac{1}{\sigma\sqrt{2\pi}}\exp\left\{\frac{(y_t-\mu_t)^2}{\sigma^2}\right\}$}
+\end{block}
+\end{textblock}
+\placefig{10.8}{1.2}{width = 5.1cm}{figures/n01.png}
+}
+
+\only<2-3>{\begin{textblock}{10.2}(0.3,3.7)
+\begin{block}{Anomaly score distribution: $S \sim \frac12 \chi^2_1 + c$}
+\centerline{$\displaystyle s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = \frac{1}{2}\left(\frac{y_t - \mu_t}{\sigma}\right)^2 + \frac{1}{2}\log(2\pi\sigma^2)$}
+\end{block}
+\end{textblock}
+\placefig{10.8}{3.8}{width = 5.1cm}{figures/as.png}
+}
+
+\begin{textblock}{10.2}(0.3,6.2)
+\begin{alertblock}{Extreme anomaly score distribution}
+\centerline{$H(x) = P(S \le u + x \mid S > u)$}
+\begin{itemize}\tightlist
+\item[\textcolor{black}{$\rightarrow$}] Generalized Pareto Distribution for almost all forecast distributions $f$.
+\end{itemize}
+\end{alertblock}
+\end{textblock}
+\placefig{10.8}{6.4}{width = 5.1cm}{figures/ase.png}
+
+## Extreme anomaly scores
 
 * Estimate one-step forecast densities: $f(y_t | y_1,\dots,y_{t-1})$.
 * Anomaly score: $s_{t} = -\log\hat{f}(y_{t}| y_1,\dots,y_{t-1})$.
@@ -64,62 +93,37 @@ tar_read(rplots)
 * Fit a Generalized Pareto Distribution to the top 5% of anomaly scores.
 * Use the GPD to estimate the probability of each observation being an anomaly.
 
-## Anomaly score distribution
+## Example
 
-\only<1-4>{\begin{textblock}{10}(0.2,2)\fontsize{13}{14}\sf
-Suppose one-step forecasts are $N(\mu_t, \sigma^2)$. \\
-So $f(y_t | y_1,\dots,y_{t-1}) = \phi\left(\frac{y_t - \mu_t}{\sigma}\right)$
-\end{textblock}
-\placefig{10.5}{1.2}{width = 5.1cm}{figures/n01.png}}
+```{r}
+#| label: n07
+#| fig-height: 3.7
+n07 <- pbs |> filter(ATC2 == "N07", Month <= yearmonth("2001 Jan"))
+n07plus <- pbs |> filter(ATC2 == "N07", Month <= yearmonth("2001 Feb"))
+fc <- n07 |> model(ets = ETS(Scripts)) |> forecast(h = 1)
+fc |> autoplot(n07)
+```
 
-\only<2-4>{\begin{textblock}{10}(0.2,4.2)\fontsize{13}{14}\sf
-Then $s_t = -\log \phi\left(\frac{y_t - \mu_t}{\sigma}\right) = \frac{1}{2}\left(\frac{y_t - \mu_t}{\sigma}\right)^2 + \frac{1}{2}\log(2\pi\sigma^2)$
+## Example
 
-So anomaly scores have distribution: $S \sim \frac12 \chi^2_1 + c$
-\end{textblock}
-\placefig{10.5}{3.8}{width = 5.1cm}{figures/as.png}
-}
+```{r}
+#| label: n07plus
+#| fig-height: 3.7
+n07 <- pbs |> filter(ATC2 == "N07", Month <= yearmonth("2001 Jan"))
+n07plus <- pbs |> filter(ATC2 == "N07", Month <= yearmonth("2001 Feb"))
+fc <- n07 |> model(ets = ETS(Scripts)) |> forecast(h = 1)
+fc |> autoplot(n07plus)
+```
 
-\only<3-4>{\begin{textblock}{10}(0.2,6.8)\fontsize{13}{14}\sf
-Conditional probability distribution of scores above threshold $u$ is Generalized Pareto:\vspace*{0.15cm}
-
-\centerline{$H(x) = P(S \le u + x \mid S > u) = 1 - (1 + \xi x/v)^{-1/\xi}$}
-\end{textblock}
-\placefig{10.5}{6.4}{width = 5.1cm}{figures/ase.png}
-}
-
-\only<4>{\begin{textblock}{9.7}(0.35,1.75)
-\fontsize{14}{20}\sf
+\only<2>{\begin{textblock}{9}(2.2,3.2)\fontsize{12}{13}\sf
 \begin{alertblock}{}
-Extreme value theory shows that the Generalized Pareto distribution is a good approximation to the distribution of the largest anomaly scores for almost all possible forecast distributions.
+Forecast distribution: $N(4261, 136066)$\\
+Actual: $y_t = 24616$\\
+Anomaly score: $s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = 1529$
+Probability of anomaly: $P(S > s_t | S > q_{0.95}) = 0.000925$
 \end{alertblock}
-\end{textblock}}
-
-## Fisher-Tippett-Gnedenko Theorem {-}
-
-$M_n = \max \{Y_1, \dots, Y_n\}$ where $Y_1, \dots, Y_n \sim$ iid $F$.
-
-Under some conditions, as $n\rightarrow\infty$,\newline $M_n$ converges in distribution to
-\begin{align*}
-  &\textbf{Weibull:} && \text{when $F$ has a finite upper bound (e.g., Uniform)} \\
-  &\textbf{Gumbel:}  && \text{when $F$ has exponential tails (e.g., Normal or Gamma)} \\
-  &\textbf{Fréchet:} && \text{when $F$ has heavy tails (e.g., Pareto or Weibull)}
-\end{align*}
-
-## Generalized Pareto distribution
-
-**Peaks Over Threshold (POT)**:  extremes are observations $>u$.
-
-Probability distribution of extremes::
-$$
-  H(y) = P\left \{Y \leq u + y \mid Y > u \right \}
-  = \frac{ F(u+y) - F(u)}{1 - F(u)}.
-$$
-When $F$ satisfies conditions of FTG theorem, then $H$ is **Generalized Pareto Distribution** (GPD):
-$$
-  H(y) \approx 1 - ( 1 + \xi y/v )^{-1/\xi} ,
-$$
-where $\{y: y >0 \text{ and } (1 + \xi y)/v >0 \}$.
+\end{textblock}
+}
 
 ## Rolling origin forecasts
 
