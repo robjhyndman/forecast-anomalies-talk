@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.4.0",
+    "Version": "4.4.1",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -61,7 +61,7 @@
     },
     "MASS": {
       "Package": "MASS",
-      "Version": "7.3-60.2",
+      "Version": "7.3-61",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -72,7 +72,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "2f342c46163b0b54d7b64d1f798e2c78"
+      "Hash": "0cafd6f0500e5deba33be22c46bf6055"
     },
     "Matrix": {
       "Package": "Matrix",
@@ -509,16 +509,15 @@
       "Version": "0.24.0.9000",
       "Source": "GitHub",
       "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "evaluate",
       "RemoteUsername": "r-lib",
+      "RemoteRepo": "evaluate",
       "RemoteRef": "HEAD",
-      "RemoteSha": "75d56e0fdb4684f93b51a12a067736109dd46cf4",
+      "RemoteSha": "21ebd59b50be2d69d20feb943fa06cdb5fbd626c",
+      "RemoteHost": "api.github.com",
       "Requirements": [
-        "R",
-        "methods"
+        "R"
       ],
-      "Hash": "77c52530639310848aa753e59dbb8c88"
+      "Hash": "ffd7fec087f379a3575211d5414c69be"
     },
     "evd": {
       "Package": "evd",
@@ -560,9 +559,15 @@
     },
     "fabletools": {
       "Package": "fabletools",
-      "Version": "0.4.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
+      "Version": "0.4.2.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "fabletools",
+      "RemoteUsername": "tidyverts",
+      "RemotePkgRef": "tidyverts/fabletools",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "6865b67b06886adba6ab3486fde0dd5d3e35f7c1",
       "Requirements": [
         "R",
         "R6",
@@ -583,7 +588,7 @@
         "utils",
         "vctrs"
       ],
-      "Hash": "005e92a674b01825e0feb29931c03c5e"
+      "Hash": "db31e92e1a5a052d76669f0ac11f8925"
     },
     "fansi": {
       "Package": "fansi",
@@ -658,11 +663,11 @@
       "Version": "0.5.0.9000",
       "Source": "GitHub",
       "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "fpp3-package",
       "RemoteUsername": "robjhyndman",
+      "RemoteRepo": "fpp3-package",
       "RemoteRef": "HEAD",
       "RemoteSha": "8af9652e3fda2d5868bb57473c2e1f0afb84d2bb",
+      "RemoteHost": "api.github.com",
       "Requirements": [
         "R",
         "cli",
@@ -1579,13 +1584,13 @@
     },
     "secretbase": {
       "Package": "secretbase",
-      "Version": "0.5.0",
+      "Version": "1.0.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
-      "Hash": "c476c18b22b21849c9f4d29b3cd720a5"
+      "Hash": "ac4ce0d0f56d126e63e7f01013f59ce2"
     },
     "shiny": {
       "Package": "shiny",
@@ -1980,7 +1985,7 @@
     },
     "xfun": {
       "Package": "xfun",
-      "Version": "0.44",
+      "Version": "0.45",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1988,7 +1993,7 @@
         "stats",
         "tools"
       ],
-      "Hash": "317a0538d32f4a009658bcedb7923f4b"
+      "Hash": "ca59c87fe305b16a9141a5874c3a7889"
     },
     "xml2": {
       "Package": "xml2",
