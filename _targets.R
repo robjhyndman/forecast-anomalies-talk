@@ -106,6 +106,37 @@ list(
           prob = lookout(density_scores = s)    # Probability not an anomaly
         )
   ),
+  # French mortality example
+  tar_target(
+    name = fr_mortality,
+    command = vital::read_hmd_files("Mx_1x1.txt") |>
+      filter(Sex != "Total") |>
+      as_tsibble()
+  ),
+  tar_target(
+    name = fr_stretch,
+    command = fr_mortality |>
+      #stretch_tsibble(.init = 30, .step=1)
+      stretch_tsibble(.init = 100, .step = 300)
+  ),
+  tar_target(
+    name = fr_fit,
+    command = fr_stretch |> model(arima = ARIMA(Mortality))
+  ),
+  tar_target(
+    name = fr_fc,
+    command = forecast(fr_fit, h = 1)
+  ),
+  tar_target(
+    name = fr_scores,
+    command = fr_fc |>
+      select(Year, Age, Sex, Mortality) |>
+      left_join(fr_mortality |> rename(actual = Mortality)) |>
+      mutate(
+        s = -log_likelihood(Mortality, actual), # Density scores
+        prob = lookout(density_scores = s)    # Probability not an anomaly
+      )
+  ),
   tar_quarto(
     name = slides,
     path = "forecast_anomalies.qmd",

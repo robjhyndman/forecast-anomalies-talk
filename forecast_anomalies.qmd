@@ -270,6 +270,53 @@ pbs |> filter(ATC2 == "R06") |> autoplot() +
   geom_vline(xintercept = as.Date(c("1998-02-01","1999-01-01")), color = "red")
 ```
 
-## Online anomaly detection
+## Example: French mortality
 
-- Demonstrate using weird package with (a) univariate models for tourism data; and (b) univariate models for age-specific time series from French mortality.
+```{r}
+#| echo: true
+#| eval: false
+fr_mortality
+```
+
+```{r}
+#| label: fr_mortality
+#| echo: false
+tar_read(fr_mortality)
+```
+
+## Example: French mortality
+
+```{r}
+#| echo: true
+#| eval: false
+fr_stretch
+```
+
+```{r}
+#| label: fr_stretch
+#| echo: false
+tar_read(fr_stretch)
+```
+
+## Example: French mortality
+
+```{r}
+#| echo: true
+#| eval: false
+fit <- fr_stretch |> model(arima = ARIMA(Mortality))
+fc <- forecast(fit, h = 1)
+fr_scores <- fc |> 
+  select(Year, Age, Sex, Mortality) |>
+  left_join(fr_mortality |> rename(actual = Mortality)) |>
+  mutate(
+    s = -log_likelihood(Mortality, actual), # Density scores
+    prob = lookout(density_scores = s)    # Probability not an anomaly
+  )
+```
+
+```{r}
+#| label: fr_scores2
+#| echo: false
+#| eval: true
+tar_read(fr_scores)
+```
