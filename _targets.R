@@ -12,7 +12,7 @@ list(
     name = pbs,
     command = PBS |>
       group_by(ATC2) |>
-      summarise(Scripts = sum(Scripts)) |>
+      summarise(Scripts = sum(Scripts)/1e3) |>
       ungroup()
   ),
   tar_target(
