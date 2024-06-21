@@ -59,7 +59,7 @@ tar_read(rplots)
 ## Anomaly score distribution
 \fontsize{12.5}{14}\sf
 
-\only<1-3>{\begin{textblock}{10.2}(0.3,1.05)
+\only<1-3>{\begin{textblock}{10.2}(0.3,1.0)
 \begin{block}{One-step forecast distribution: $N(\mu_t, \sigma^2)$}
 \centerline{$\displaystyle f(y_t | y_1,\dots,y_{t-1}) = \phi\left(\frac{y_t - \mu_t}{\sigma}\right) = \frac{1}{\sigma\sqrt{2\pi}}\exp\left\{\frac{(y_t-\mu_t)^2}{\sigma^2}\right\}$}
 \end{block}
@@ -67,15 +67,15 @@ tar_read(rplots)
 \placefig{10.8}{1.2}{width = 5.1cm}{figures/n01.png}
 }
 
-\only<2-3>{\begin{textblock}{10.2}(0.3,3.7)
+\only<2-3>{\begin{textblock}{10.2}(0.3,3.65)
 \begin{block}{Anomaly score distribution: $S \sim \frac12 \chi^2_1 + c$}
-\centerline{$\displaystyle s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = \frac{1}{2}\left(\frac{y_t - \mu_t}{\sigma}\right)^2 + \frac{1}{2}\log(2\pi\sigma^2)$}
+\centerline{$\displaystyle s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = \frac{1}{2}\left(\frac{y_t - \mu_t}{2\sigma}\right)^2 + \frac{1}{2}\log(2\pi\sigma^2)$}
 \end{block}
 \end{textblock}
 \placefig{10.8}{3.8}{width = 5.1cm}{figures/as.png}
 }
 
-\only<3>{\begin{textblock}{10.2}(0.3,6.2)
+\only<3>{\begin{textblock}{10.2}(0.3,6.15)
 \begin{alertblock}{Extreme anomaly score distribution}
 \centerline{$H(x) = P(S \le u + x \mid S > u)$}
 \begin{itemize}\tightlist
@@ -97,34 +97,76 @@ tar_read(rplots)
 ## Example
 
 ```{r}
-#| label: n07
-#| fig-height: 3.7
-n07 <- pbs |> filter(ATC2 == "N07", Month <= yearmonth("2001 Jan"))
-n07plus <- pbs |> filter(ATC2 == "N07", Month <= yearmonth("2001 Feb"))
-fc <- n07 |> model(ets = ETS(Scripts)) |> forecast(h = 1)
-fc |> autoplot(n07)
+#| label: a12
+#| fig-height: 3.6
+a12 <- pbs |> filter(ATC2 == "A12", Month <= yearmonth("2006 Jan"))
+a12plus <- pbs |> filter(ATC2 == "A12", Month <= yearmonth("2006 Feb"))
+fc <- a12 |> model(ets = ETS(Scripts)) |> forecast(h = 1)
 ```
+
+\pause\vspace*{-0.315cm}
+
+```{r}
+#| label: a12plot0
+#| echo: true
+#| eval: false
+fc |> autoplot(a12)
+```
+
+```{r}
+#| label: a12plot1
+#| echo: false
+#| eval: true
+#| fig-height: 3.6
+fc |> 
+  autoplot(a12) + 
+  labs(y = "Scripts (thousands)",
+       title = "Forecast of A12 scripts: Feb 2006") +
+  theme(legend.position = "none") +
+  ylim(35,145)
+```
+
+\only<3>{\begin{textblock}{10.4}(2.1,3.6)\fontsize{12}{13}\sf
+\begin{alertblock}{}
+Forecast distribution:\hfill $N(70.5, 3.9^2)$
+\end{alertblock}
+\end{textblock}
+}
+
 
 ## Example
 
 ```{r}
-#| label: n07plus
-#| fig-height: 3.7
-n07 <- pbs |> filter(ATC2 == "N07", Month <= yearmonth("2001 Jan"))
-n07plus <- pbs |> filter(ATC2 == "N07", Month <= yearmonth("2001 Feb"))
-fc <- n07 |> model(ets = ETS(Scripts)) |> forecast(h = 1)
-fc |> autoplot(n07plus)
+#| label: a12plus
+#| eval: false
+#| echo: true
+a12 <- pbs |> filter(ATC2 == "A12", Month <= yearmonth("2006 Jan"))
+a12plus <- pbs |> filter(ATC2 == "A12", Month <= yearmonth("2006 Feb"))
+fc <- a12 |> model(ets = ETS(Scripts)) |> forecast(h = 1)
+fc |> autoplot(a12plus) 
 ```
 
-\only<2>{\begin{textblock}{9.5}(2.2,3.2)\fontsize{12}{13}\sf
+```{r}
+#| label: a12plot2
+#| echo: false
+#| eval: true
+#| fig-height: 3.6
+fc |> 
+  autoplot(a12plus) + 
+  labs(y = "Scripts (thousands)",
+       title = "Forecast of A12 scripts: Feb 2006") +
+  theme(legend.position = "none") +
+  ylim(35,145)
+```
+
+\begin{textblock}{10.4}(2.1,3.6)\fontsize{12}{13}\sf
 \begin{alertblock}{}
-Forecast distribution:\hfill $N(4261, 369^2)$\\
-Actual:\hfill $y_t = 24616$\\
-Anomaly score:\hfill $s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = 1529$
-Probability of anomaly:\hfill $P(S > s_t | S > q_{0.95}) = 0.0009$
+Forecast distribution:\hfill $N(70.5, 3.9^2)$\only<2>{\\
+Actual:\hfill $y_t = 36.4$\\
+Anomaly score:\hfill $s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = 40.8$
+Probability not an anomaly:\hfill $P(S > s_t | S > q_{0.95}) = 0.0377$}
 \end{alertblock}
 \end{textblock}
-}
 
 ## Rolling origin forecasts
 
