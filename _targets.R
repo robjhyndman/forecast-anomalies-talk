@@ -116,8 +116,8 @@ list(
   tar_target(
     name = fr_stretch,
     command = fr_mortality |>
-      #stretch_tsibble(.init = 30, .step=1)
-      stretch_tsibble(.init = 100, .step = 300)
+      stretch_tsibble(.init = 30, .step=1)
+      #stretch_tsibble(.init = 100, .step = 300)
   ),
   tar_target(
     name = fr_fit,
