@@ -45,7 +45,7 @@ tscv_plot <- function(.init, .step, h = 1) {
     ) +
     geom_point(aes(col = observation), size = 2) +
     scale_y_reverse() +
-    scale_color_manual(values = c(train = "#0072B2", test = "#D55E00", unused = "gray")) +
+    scale_color_manual(values = c(train = "#0072B2", test = "#c14b14", unused = "gray")) +
     guides(col = "none") +
     labs(x = "time", y = "") +
     theme_void() +
