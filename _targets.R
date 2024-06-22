@@ -8,28 +8,12 @@ tar_option_set(
 tar_source()
 
 list(
+  # Fira Sans font for graphics
   tar_target(
-    name = pbs,
-    command = PBS |>
-      group_by(ATC2) |>
-      summarise(Scripts = sum(Scripts)/1e3) |>
-      ungroup()
-  ),
-  tar_target(
-    # Fira Sans font for graphics
     name = ggfont,
     command = ggplot2::theme(text = ggplot2::element_text(family = "Fira Sans"))
   ),
-  tar_target(
-    name = rplots,
-    command = pbs  |>
-      filter(substr(ATC2, 1, 1) == "R")  |>
-      ggplot(aes(x = Month, y = Scripts, colour  = ATC2)) +
-      geom_line() +
-      facet_grid(ATC2 ~ ., scales = "free_y") +
-      labs(title = "Scripts for ATC group R") +
-      ggfont
-  ),
+  # Generic graphs explaining the idea
   tar_target(# One-step forecast distribution
     name = p1,
     command = tibble(y = seq(-4,4,l=501), fy = dnorm(y)) |>
@@ -47,9 +31,9 @@ list(
   tar_target(# Anomaly score distribution
     name = p2,
     command = tibble(
-        y = seq(0, 8, l=501),
-        fy = 0.5*dchisq(y, df = 1)
-      ) |>
+      y = seq(0, 8, l=501),
+      fy = 0.5*dchisq(y, df = 1)
+    ) |>
       density_plot(fill = "#94a8df") +
       labs(
         x = "s",
@@ -63,9 +47,9 @@ list(
   tar_target(# Exceedance distribution about 95% quantile
     name = p3,
     command = tibble(
-        y = c(0,u,seq(u, 8, l=501)),
-        fy = c(0,0, 0.5*dchisq(y[-(1:2)], df = 1))
-      ) |>
+      y = c(0,u,seq(u, 8, l=501)),
+      fy = c(0,0, 0.5*dchisq(y[-(1:2)], df = 1))
+    ) |>
       density_plot(fill = "#94a8df") +
       labs(
         x = "s",
@@ -83,7 +67,23 @@ list(
     name = tscvplot,
     command = tscv_plot(.init = 8, .step = 1, h = 1) +
       annotate("text", x = 9, y = 0, label = "h = 1",
-        color = "#D55E00", family = 'Fira Sans')
+               color = "#D55E00", family = 'Fira Sans')
+  ),
+  # PBS example
+  tar_target(
+    name = pbs,
+    command = PBS |>
+      group_by(ATC2) |>
+      summarise(Scripts = sum(Scripts)/1e3) |>
+      ungroup()
+  ),
+  tar_target(
+    name = a12plot,
+    command = pbs  |>
+      filter(ATC2 == "A12") |>
+      autoplot() +
+      labs(title = "Scripts for ATC group A12") +
+      ggfont
   ),
   tar_target(
     name = pbs_stretch,
@@ -106,18 +106,37 @@ list(
           prob = lookout(density_scores = s)    # Probability not an anomaly
         )
   ),
+  tar_target(
+    name = pbs_anomalies,
+    command = pbs_scores |>
+      filter(prob < 0.01)
+  ),
+  tar_target(
+    name = l03,
+    command = pbs_plot(pbs, pbs_anomalies, "L03")
+  ),
+  tar_target(
+    name = n07,
+    command = pbs_plot(pbs, pbs_anomalies, "N07")
+  ),
+  tar_target(
+    name = r06,
+    command = pbs_plot(pbs, pbs_anomalies, "R06")
+  ),
   # French mortality example
   tar_target(
     name = fr_mortality,
     command = vital::read_hmd_files("Mx_1x1.txt") |>
+      vital::collapse_ages(max_age = 100) |>
       filter(Sex != "Total") |>
-      as_tsibble()
+      as_tsibble() |>
+      select(Year, Age, Sex, Mortality)
   ),
   tar_target(
     name = fr_stretch,
     command = fr_mortality |>
-      stretch_tsibble(.init = 30, .step=1)
-      #stretch_tsibble(.init = 100, .step = 300)
+      stretch_tsibble(.init = 30, .step=1) |>
+      select(.id, everything())
   ),
   tar_target(
     name = fr_fit,
@@ -137,6 +156,47 @@ list(
         prob = lookout(density_scores = s)    # Probability not an anomaly
       )
   ),
+  tar_target(
+    name = fr_anomalies,
+    command = fr_scores |>
+      filter(prob < 0.05) |>
+      as_tibble() |>
+      select(Year, Sex, Age) |>
+      distinct() |>
+      left_join(fr_mortality)
+  ),
+  tar_target(
+    name = yrs,
+    command = fr_anomalies |>
+      select(Year, Sex) |>
+      distinct() |>
+      mutate(Age = 10)
+  ),
+  tar_target(
+    name = fr_anomalies_plot,
+    command = fr_anomalies |>
+      ggplot(aes(x = Year, y = Age, color = Sex)) +
+      facet_grid(. ~ Sex) +
+      scale_x_continuous(breaks = seq(1870, 1945, by=10)) +
+      labs(title = "French mortality anomalies") +
+      geom_point() +
+      ylim(4,100) +
+      theme(legend.position = "none")
+  ),
+  tar_target(
+    name = fr_anomalies_plot2,
+    command = fr_anomalies |>
+      ggplot(aes(x = Year, y = Age, color = Sex)) +
+      facet_grid(. ~ Sex) +
+      scale_x_continuous(breaks = seq(1870, 1945, by=10)) +
+      labs(title = "French mortality anomalies") +
+      geom_vline(xintercept = yrs$Year, color = "grey") +
+      geom_point() +
+      ylim(4,100) +
+      theme(legend.position = "none") +
+      ggrepel::geom_text_repel(data = yrs, aes(label = Year), size=3)
+  ),
+  # Slides
   tar_quarto(
     name = slides,
     path = "forecast_anomalies.qmd",

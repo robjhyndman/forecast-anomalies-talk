@@ -27,11 +27,12 @@ library(knitr)
 library(targets)
 library(fpp3)
 tar_load(c("pbs", "pbs_stretch", "pbs_fit", "pbs_fc", "pbs_scores"))
+tar_load(c("fr_mortality","fr_scores"))
 
 # Colours to be viridis for continuous scales and Okabe for discrete scales
 options(
   digits = 3,
-  width = 70,
+  width = 75,
   ggplot2.continuous.colour = "viridis",
   ggplot2.continuous.fill = "viridis",
   ggplot2.discrete.colour = c("#D55E00", "#0072B2", "#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#F0E442"),
@@ -53,7 +54,7 @@ pbs
 ```{r}
 #| label: pbs2
 #| echo: false
-tar_read(rplots)
+tar_read(a12plot)
 ```
 
 ## Anomaly score distribution
@@ -88,11 +89,13 @@ tar_read(rplots)
 
 ## Anomaly detection algorithm
 
-* Estimate one-step forecast densities: $f(y_t | y_1,\dots,y_{t-1})$.
+For each $t$:
+
+* Estimate one-step forecast density: $f(y_t | y_1,\dots,y_{t-1})$.
 * Anomaly score: $s_{t} = -\log\hat{f}(y_{t}| y_1,\dots,y_{t-1})$.
-* High anomaly scores indicate potential anomalies.
-* Fit a Generalized Pareto Distribution to the top 5% of anomaly scores.
-* Use the GPD to estimate the probability of each observation being an anomaly.
+* High anomaly score indicates potential anomaly.
+* Fit a Generalized Pareto Distribution to the top 5% of anomaly scores seen so far.
+* $y_t$ is anomaly if $P(S > s_t) < 0.01$ under GPD.
 
 ## Example
 
@@ -222,7 +225,7 @@ pbs_fc <- forecast(pbs_fit, h = 1)
 pbs_fc
 ```
 
-## Finding anomalies
+## PBS anomalies
 
 ```{r}
 #| label: pbs_scores
@@ -243,53 +246,80 @@ pbs_scores <- pbs_fc |>
 pbs_scores
 ```
 
-## Finding anomalies
+## PBS anomalies
 
 ```{r}
 #| label: pbs_scores3
-pbs_scores |> arrange(prob)
+pbs_scores |> filter(prob < 0.01)
 ```
 
-## Finding anomalies
+## PBS anomalies
 
 ```{r}
 #| label: pbs_scores4
-#| fig-height: 3.7
-pbs |> filter(ATC2 == "N07") |> autoplot() +
-  scale_x_yearmonth(date_breaks = "2 years", date_labels = "%Y") +
-  geom_vline(xintercept = as.Date("2001-02-01"), color = "red")
+#| echo: false
+tar_read(l03)
 ```
 
-## Finding anomalies
+## PBS anomalies
 
 ```{r}
 #| label: pbs_scores5
-#| fig-height: 3.7
-pbs |> filter(ATC2 == "R06") |> autoplot() +
-  scale_x_yearmonth(date_breaks = "2 years", date_labels = "%Y") +
-  geom_vline(xintercept = as.Date(c("1998-02-01","1999-01-01")), color = "red")
+#| echo: false
+tar_read(n07)
 ```
 
-## Example: French mortality
+\only<2>{\begin{textblock}{6.3}(2.1,1.8)\fontsize{12}{13}\sf
+\begin{alertblock}{What have we learned?}
+\begin{itemize}\tightlist
+\item Consecutive anomalies are hard to identify because the preceding anomalies corrupt the model.
+\end{itemize}
+\end{alertblock}
+\end{textblock}
+}   
+
+
+
+## PBS anomalies
 
 ```{r}
-#| echo: true
-#| eval: false
-fr_mortality
+#| label: pbs_scores6
+#| echo: false
+tar_read(r06)
 ```
+
+\only<2>{\begin{textblock}{6}(8.5,1.8)\fontsize{12}{13}\sf
+\begin{alertblock}{What have we learned?}
+\begin{itemize}\tightlist
+\item A sequence of near anomalies makes it hard to spot a true anomaly.
+\end{itemize}
+\end{alertblock}
+\end{textblock}
+}   
+
+## Modified anomaly detection algorithm
+
+For each $t$:
+
+* Estimate one-step forecast density: $f(y_t | y_1,\dots,y_{t-1})$.
+* Anomaly score: $s_{t} = -\log\hat{f}(y_{t}| y_1,\dots,y_{t-1})$.
+* High anomaly score indicates potential anomaly.
+* Fit a Generalized Pareto Distribution to the top 5% of anomaly scores seen so far.
+* $y_t$ is anomaly if $P(S > s_t) < 0.01$ under GPD. 
+* **If $y_t$ is anomaly, set $y_t$ to missing for next iteration**.
+
+## Example: French mortality
 
 ```{r}
 #| label: fr_mortality
-#| echo: false
-tar_read(fr_mortality)
+fr_mortality
 ```
-
 ## Example: French mortality
 
 ```{r}
 #| echo: true
 #| eval: false
-fr_stretch
+fr_stretch <- fr_mortality |> stretch_tsibble(.init = 30, .step=1)
 ```
 
 ```{r}
@@ -318,5 +348,41 @@ fr_scores <- fc |>
 #| label: fr_scores2
 #| echo: false
 #| eval: true
-tar_read(fr_scores)
+fr_scores
+```
+
+
+## Example: French mortality
+
+```{r}
+#| label: fr_scores3
+fr_scores |> arrange(prob)
+```
+
+## Example: French mortality
+
+```{r}
+#| label: fr_scores4
+#| echo: false
+tar_read(fr_anomalies_plot)
+```
+
+## Example: French mortality
+
+```{r}
+#| label: fr_scores5
+#| echo: false
+tar_read(fr_anomalies_plot2)
+```
+
+## Example: French mortality
+
+```{r}
+#| label: fr_scores6
+#| echo: false
+fr_mortality |>
+  filter(Age == 25) |>
+  select(-Age) |>
+  autoplot(Mortality) +
+  geom_point(data = tar_read(fr_anomalies) |> filter(Age == 25))
 ```

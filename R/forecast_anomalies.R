@@ -52,3 +52,14 @@ tscv_plot <- function(.init, .step, h = 1) {
     theme(axis.title.x = element_text(margin = margin(t = 2))) +
     theme(text = ggplot2::element_text(family = 'Fira Sans'))
 }
+
+pbs_plot <- function(pbs, anomalies, series) {
+  dates <- anomalies |> dplyr::filter(ATC2 == series) |> dplyr::pull(Month) |> as.Date()
+  pbs |>
+    dplyr::filter(ATC2 == series) |>
+    ggplot2::ggplot(ggplot2::aes(x = Month, y = Scripts)) +
+    tsibble::scale_x_yearmonth(date_breaks = "2 years", date_labels = "%Y") +
+    ggplot2::geom_vline(xintercept = dates, color = "red", alpha = 0.4) +
+    ggplot2::geom_line() +
+    ggplot2::labs(title = paste("Scripts for ATC group", series))
+}

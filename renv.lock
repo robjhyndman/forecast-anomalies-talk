@@ -479,7 +479,7 @@
     },
     "crayon": {
       "Package": "crayon",
-      "Version": "1.5.2",
+      "Version": "1.5.3",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -487,7 +487,7 @@
         "methods",
         "utils"
       ],
-      "Hash": "e8a1e41acf02548751f45c718d55aa6a"
+      "Hash": "859d96e65ef198fd43e82b9628d593ef"
     },
     "crop": {
       "Package": "crop",
@@ -628,12 +628,12 @@
       "RemoteUsername": "r-lib",
       "RemoteRepo": "evaluate",
       "RemoteRef": "HEAD",
-      "RemoteSha": "21ebd59b50be2d69d20feb943fa06cdb5fbd626c",
+      "RemoteSha": "7c6bad8ea38c44a4ff5b737895626913a58dc7a7",
       "RemoteHost": "api.github.com",
       "Requirements": [
         "R"
       ],
-      "Hash": "ffd7fec087f379a3575211d5414c69be"
+      "Hash": "f9efa0b8d47fe411ac70f8f64d59c1df"
     },
     "evd": {
       "Package": "evd",
@@ -779,11 +779,11 @@
       "Version": "0.5.0.9000",
       "Source": "GitHub",
       "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "fpp3-package",
       "RemoteUsername": "robjhyndman",
+      "RemoteRepo": "fpp3-package",
       "RemoteRef": "HEAD",
       "RemoteSha": "8af9652e3fda2d5868bb57473c2e1f0afb84d2bb",
+      "RemoteHost": "api.github.com",
       "Requirements": [
         "R",
         "cli",
@@ -903,6 +903,22 @@
         "withr"
       ],
       "Hash": "44c6a2f8202d5b7e878ea274b1092426"
+    },
+    "ggrepel": {
+      "Package": "ggrepel",
+      "Version": "0.9.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "Rcpp",
+        "ggplot2",
+        "grid",
+        "rlang",
+        "scales",
+        "withr"
+      ],
+      "Hash": "cc3361e234c4a5050e29697d675764aa"
     },
     "globals": {
       "Package": "globals",
@@ -2131,7 +2147,7 @@
     },
     "targets": {
       "Package": "targets",
-      "Version": "1.7.0",
+      "Version": "1.7.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2155,7 +2171,7 @@
         "vctrs",
         "yaml"
       ],
-      "Hash": "27ee47827a89430be0d38b78c0cb8fb7"
+      "Hash": "d79b21ef513564351577d7064e1fc4dd"
     },
     "tibble": {
       "Package": "tibble",
