@@ -14,6 +14,44 @@ list(
     command = ggplot2::theme(text = ggplot2::element_text(family = "Fira Sans"))
   ),
   # Paradigms
+  tar_target(
+    name = paradigm1_plot,
+    command = pbs |>
+     filter(ATC2 == "A12", Month <= yearmonth("2006 Feb")) |>
+     autoplot() +
+      theme_void()
+  ),
+  tar_target(
+    name = paradigm1,
+    command = savepng(paradigm1_plot, "paradigm1.png"),
+    format = "file"
+  ),
+  tar_target(
+    name = paradigm2_plot,
+    command = fr_mortality |>
+      filter(Age == 20, Sex == "Male") |>
+      autoplot(Mortality) +
+      theme_void()
+  ),
+  tar_target(
+    name = paradigm2,
+    command = savepng(paradigm2_plot, "paradigm2.png"),
+    format = "file"
+  ),
+  tar_target(
+    name = paradigm3_plot,
+    command = fr_mortality |>
+      filter(Age %in% c(2:6,60), Sex == "Female") |>
+      autoplot(Mortality) +
+      guides(col = "none") +
+      theme_void()  +
+      scale_y_log10()
+  ),
+  tar_target(
+    name = paradigm3,
+    command = savepng(paradigm3_plot, "paradigm3.png"),
+    format = "file"
+  ),
   # Generic graphs explaining the idea
   tar_target( # One-step forecast distribution
     name = p1,
@@ -61,9 +99,21 @@ list(
       scale_x_continuous(breaks = u, labels = "u") + theme(axis.text.x = element_text()) +
       ggfont
   ),
-  tar_target(name = n01, command = savepng(p1, "n01.png")),
-  tar_target(name = as, command = savepng(p2, "as.png")),
-  tar_target(name = ase, command = savepng(p3, "ase.png")),
+  tar_target(
+    name = n01,
+    command = savepng(p1, "n01.png"),
+    format = "file"
+  ),
+  tar_target(
+    name = as,
+    command = savepng(p2, "as.png"),
+    format = "file"
+  ),
+  tar_target(
+    name = ase,
+    command = savepng(p3, "ase.png"),
+    format = "file"
+  ),
   tar_target(
     name = tscvplot,
     command = tscv_plot(.init = 8, .step = 1, h = 1) +
@@ -263,6 +313,6 @@ list(
   tar_quarto(
     name = slides,
     path = "forecast_anomalies.qmd",
-    extra_files = "before-title.tex"
+    extra_files = c("before-title.tex", fs::dir_ls("figures"))
   )
 )

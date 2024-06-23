@@ -20,6 +20,7 @@ savepng <- function(p, file) {
   png(file, width = 12, height = 6, units="cm", res=300, type="cairo-png")
   print(p)
   crop::dev.off.crop(file)
+  return(file)
 }
 
 tscv_plot <- function(.init, .step, h = 1) {

@@ -43,16 +43,23 @@ ggplot2::theme_set(ggplot2::theme_get() + ggplot2::theme(text = ggplot2::element
 ```
 
 
-## Anomaly detection paradigms
+## Time series anomaly detection paradigms
 
 \begin{textblock}{7.2}(0.1,1.1)
 \fontsize{13}{15}\sf
-\begin{enumerate}\tightlist\itemsep=0.2cm
-\item \only<2>{\textcolor{Orange}}{Identify anomalies within a time series in real time: use one-step forecast distributions}
-\item Identify anomalies within a time series in historical data: use residual distributions
-\item Identify an anomalous time series in a collection of time series: use feature-based approach
+\begin{enumerate}\tightlist\itemsep=0.4cm
+\item \only<4>{\textcolor{Orange}}{\textbf{Identify anomalies within a time series in real time}:\newline 
+  use one-step forecast distributions}
+\only<2-4>{\item \textbf{Identify anomalies within a time series in historical data}:\newline 
+  use residual distributions}
+\only<3-4>{\item \textbf{Identify an anomalous time series in a collection of time series}:\newline 
+  use feature-based approach}
 \end{enumerate}
 \end{textblock}
+\placefig{7.5}{1.2}{width = 8.6cm, height = 2.4cm, keepaspectratio = false}{figures/paradigm1.png}
+\only<2-4>{\placefig{7.5}{3.9}{width = 8.6cm, height = 2.4cm, keepaspectratio = false}{figures/paradigm2.png}}
+\only<3-4>{\placefig{7.5}{6.5}{width = 8.6cm, height = 2.4cm, keepaspectratio = false}{figures/paradigm3.png}}
+
 
 ## Australian PBS data
 
@@ -327,14 +334,14 @@ For each $t$:
 * **If $y_t$ is anomaly, set $y_t$ to missing**.
 * **Repeat**
 
-## Anomaly detection paradigms
+## Time series anomaly detection paradigms
 
 \begin{textblock}{7.2}(0.1,1.1)
 \fontsize{13}{15}\sf
 \begin{enumerate}\tightlist\itemsep=0.2cm
-\item Identify anomalies within a time series in real time: use one-step forecast distributions
-\item \only<2>{\textcolor{Orange}}{Identify anomalies within a time series in historical data: use residual distributions}
-\item Identify an anomalous time series in a collection of time series: use feature-based approach
+\item \textbf{Identify anomalies within a time series in real time}: use one-step forecast distributions
+\item \only<2>{\textcolor{Orange}}{\textbf{Identify anomalies within a time series in historical data}: use residual distributions}
+\item \textbf{Identify an anomalous time series in a collection of time series}: use feature-based approach
 \end{enumerate}
 \end{textblock}
 
