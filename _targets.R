@@ -13,6 +13,7 @@ list(
     name = ggfont,
     command = ggplot2::theme(text = ggplot2::element_text(family = "Fira Sans"))
   ),
+  # Paradigms
   # Generic graphs explaining the idea
   tar_target( # One-step forecast distribution
     name = p1,
@@ -26,7 +27,7 @@ list(
   ),
   tar_target( # Anomaly score threshold
     name = u,
-    command = 0.5 * qchisq(0.95, df = 1) + 0.5 * log(2 * pi)
+    command = 0.5 * qchisq(0.90, df = 1) + 0.5 * log(2 * pi)
   ),
   tar_target( # Anomaly score distribution
     name = p2,
@@ -41,7 +42,7 @@ list(
         title = "Anomaly score density"
       ) +
       geom_vline(xintercept = u, linetype = "dashed") +
-      annotate("text", x = u + 0.1, y = 0.15, label = "95% quantile", vjust = 1, hjust = 0) +
+      annotate("text", x = u + 0.1, y = 0.15, label = "90% quantile", vjust = 1, hjust = 0) +
       ggfont
   ),
   tar_target( # Exceedance distribution about 95% quantile
@@ -84,7 +85,7 @@ list(
     command = pbs |>
       filter(ATC2 == "A12") |>
       autoplot() +
-      labs(title = "Scripts for ATC group A12") +
+      labs(title = "Scripts for ATC group A12 (Mineral supplements)") +
       ggfont
   ),
   tar_target(
@@ -103,15 +104,17 @@ list(
     name = pbs_scores,
     command = pbs_fc |>
       left_join(pbs |> rename(actual = Scripts), by = c("ATC2", "Month")) |>
+      group_by(.id) |>
       mutate(
         s = -log_likelihood(Scripts, actual), # Density scores
-        prob = lookout(density_scores = s) # Probability not an anomaly
-      )
+        prob = lookout(density_scores = s, threshold = 0.9) # Probability not an anomaly
+      ) |>
+      ungroup()
   ),
   tar_target(
     name = pbs_anomalies,
     command = pbs_scores |>
-      filter(prob < 0.01)
+      filter(prob < 0.05)
   ),
   tar_target(
     name = l03,
@@ -129,8 +132,8 @@ list(
   tar_target(
     name = fr_mortality,
     command = vital::read_hmd_files("Mx_1x1.txt") |>
-      filter(Sex != "Total") |>
-      vital::collapse_ages(max_age = 100) |>
+      filter(Sex != "Total", Year < 2000) |>
+      vital::collapse_ages(max_age = 85) |>
       as_tsibble() |>
       select(Year, Age, Sex, Mortality)
   ),
@@ -139,26 +142,26 @@ list(
     command = fr_mortality |> model(arima = ARIMA(log(Mortality)))
   ),
   tar_target(
-    name = fr_sd,
+    name = fr_sigma,
     command = augment(fr_fit) |>
       as_tibble() |>
       group_by(Age, Sex) |>
-      summarise(sd = sd(.innov), .groups = "drop")
+      summarise(sigma = sqrt(mean(.innov^2, na.rm = TRUE)), .groups = "drop")
   ),
   tar_target(
     name = fr_scores,
     command = augment(fr_fit) |>
-    as_tibble() |>
-    left_join(fr_sd) |>
-    mutate(
-      s = -log(dnorm(.innov/sd)), # Density scores
-      prob = lookout(density_scores = s) # Probability not an anomaly
-    )
+      as_tibble() |>
+      left_join(fr_sigma) |>
+      mutate(
+        s = -log(dnorm(.innov / sigma)), # Density scores
+        prob = lookout(density_scores = s, threshold_probability = 0.9) # Probability not an anomaly
+      ) |>
+      select(-.model, -.resid, -.fitted, -sigma)
   ),
   tar_target(
     name = fr_mortality2,
     command = fr_mortality |>
-      select(-prob) |>
       left_join(fr_scores |> select(Year, Age, Sex, prob)) |>
       mutate(
         Mortality = if_else(prob < 0.05, NA_real_, Mortality)
@@ -169,20 +172,20 @@ list(
     command = fr_mortality2 |> model(arima = ARIMA(log(Mortality)))
   ),
   tar_target(
-    name = fr_sd2,
+    name = fr_sigma2,
     command = augment(fr_fit2) |>
       as_tibble() |>
       group_by(Age, Sex) |>
-      summarise(sd = sd(.innov), .groups = "drop")
+      summarise(sigma = sqrt(mean(.innov^2, na.rm = TRUE)), .groups = "drop")
   ),
   tar_target(
     name = fr_scores2,
     command = augment(fr_fit2) |>
       as_tibble() |>
-      left_join(fr_sd2) |>
+      left_join(fr_sigma2) |>
       mutate(
-        s = -log(dnorm(.innov/sd)), # Density scores
-        prob = lookout(density_scores = s) # Probability not an anomaly
+        s = -log(dnorm(.innov / sigma)), # Density scores
+        prob = lookout(density_scores = s, threshold = 0.9) # Probability not an anomaly
       )
   ),
   tar_target(
@@ -198,32 +201,63 @@ list(
     name = yrs,
     command = fr_anomalies |>
       select(Year, Sex) |>
-      distinct() |>
-      mutate(Age = 10)
+      distinct()
+  ),
+  tar_target(
+    name = fr_anomalies_plot_male,
+    command = fr_anomalies |>
+      filter(Sex == "Male") |>
+      ggplot(aes(x = Year, y = Age)) +
+      facet_grid(. ~ Sex) +
+      scale_x_continuous(breaks = seq(1820, 2000, by = 20), limits = range(yrs$Year)) +
+      geom_point(col = "#478cb2") +
+      ylim(4, 85)
+  ),
+  tar_target(
+    name = fr_anomalies_plot_female,
+    command = fr_anomalies |>
+      filter(Sex == "Female") |>
+      ggplot(aes(x = Year, y = Age)) +
+      facet_grid(. ~ Sex) +
+      scale_x_continuous(breaks = seq(1820, 2000, by = 20), limits = range(yrs$Year)) +
+      labs(title = "French mortality anomalies") +
+      geom_point(col = "#c1653a") +
+      ylim(4, 85)
   ),
   tar_target(
     name = fr_anomalies_plot,
+    command = patchwork::wrap_plots(fr_anomalies_plot_female, fr_anomalies_plot_male, nrow=1)
+  ),
+  tar_target(
+    name = fr_anomalies_plot_male2,
     command = fr_anomalies |>
-      ggplot(aes(x = Year, y = Age, color = Sex)) +
+      filter(Sex == "Male") |>
+      ggplot(aes(x = Year, y = Age)) +
       facet_grid(. ~ Sex) +
-      scale_x_continuous(breaks = seq(1870, 1945, by = 10)) +
+      scale_x_continuous(breaks = seq(1820, 2000, by = 20), limits = range(yrs$Year)) +
+      geom_vline(xintercept = unique(yrs$Year[yrs$Sex == "Male"]), alpha = 0.5, color = "grey") +
+      geom_point(col = "#478cb2") +
+      ggrepel::geom_text_repel(data = yrs[yrs$Sex == "Male" & !(yrs$Year %in% 1944:1946),],
+          aes(y = 75, label = Year), col = "#478cb2", size = 3) +
+      ylim(4, 85)
+  ),
+  tar_target(
+    name = fr_anomalies_plot_female2,
+    command = fr_anomalies |>
+      filter(Sex == "Female") |>
+      ggplot(aes(x = Year, y = Age)) +
+      facet_grid(. ~ Sex) +
+      scale_x_continuous(breaks = seq(1820, 2000, by = 20), limits = range(yrs$Year)) +
+      geom_vline(xintercept = unique(yrs$Year[yrs$Sex == "Female"]), alpha = 0.5, color = "grey") +
       labs(title = "French mortality anomalies") +
-      geom_point() +
-      ylim(4, 100) +
-      theme(legend.position = "none")
+      geom_point(col = "#c1653a") +
+      ggrepel::geom_text_repel(data = yrs[yrs$Sex == "Female" & !(yrs$Year %in% 1944:1946),],
+        aes(y = 75, label = Year), col = "#c1653a", size = 3) +
+      ylim(4, 85)
   ),
   tar_target(
     name = fr_anomalies_plot2,
-    command = fr_anomalies |>
-      ggplot(aes(x = Year, y = Age, color = Sex)) +
-      facet_grid(. ~ Sex) +
-      scale_x_continuous(breaks = seq(1870, 1945, by = 10)) +
-      labs(title = "French mortality anomalies") +
-      geom_vline(xintercept = yrs$Year, color = "grey") +
-      geom_point() +
-      ylim(4, 100) +
-      theme(legend.position = "none") +
-      ggrepel::geom_text_repel(data = yrs, aes(label = Year), size = 3)
+    command = patchwork::wrap_plots(fr_anomalies_plot_female2, fr_anomalies_plot_male2, nrow=1)
   ),
   # Slides
   tar_quarto(

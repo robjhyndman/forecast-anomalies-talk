@@ -27,7 +27,7 @@ library(knitr)
 library(targets)
 library(fpp3)
 tar_load(c("pbs", "pbs_stretch", "pbs_fit", "pbs_fc", "pbs_scores"))
-tar_load(c("fr_mortality","fr_scores"))
+tar_load(c("fr_mortality", "fr_scores"))
 
 # Colours to be viridis for continuous scales and Okabe for discrete scales
 options(
@@ -41,6 +41,18 @@ options(
 # Fira Sans font for graphics to match the main text
 ggplot2::theme_set(ggplot2::theme_get() + ggplot2::theme(text = ggplot2::element_text(family = "Fira Sans")))
 ```
+
+
+## Anomaly detection paradigms
+
+\begin{textblock}{7.2}(0.1,1.1)
+\fontsize{13}{15}\sf
+\begin{enumerate}\tightlist\itemsep=0.2cm
+\item \only<2>{\textcolor{Orange}}{Identify anomalies within a time series in real time: use one-step forecast distributions}
+\item Identify anomalies within a time series in historical data: use residual distributions
+\item Identify an anomalous time series in a collection of time series: use feature-based approach
+\end{enumerate}
+\end{textblock}
 
 ## Australian PBS data
 
@@ -62,13 +74,13 @@ tar_read(a12plot)
 
 \only<1-3>{\begin{textblock}{10.2}(0.3,1.0)
 \begin{block}{One-step forecast distribution: $N(\mu_t, \sigma^2)$}
-\centerline{$\displaystyle f(y_t | y_1,\dots,y_{t-1}) = \phi\left(\frac{y_t - \mu_t}{\sigma}\right) = \frac{1}{\sigma\sqrt{2\pi}}\exp\left\{\frac{(y_t-\mu_t)^2}{\sigma^2}\right\}$}
+\centerline{$\displaystyle f(y_t | y_1,\dots,y_{t-1}) = \phi\left(\frac{y_t - \mu_t}{\sigma}\right) = \frac{1}{\sigma\sqrt{2\pi}}\exp\left\{\frac{(y_t-\mu_t)^2}{2\sigma^2}\right\}$}
 \end{block}
 \end{textblock}
 \placefig{10.8}{1.2}{width = 5.1cm}{figures/n01.png}
 }
 
-\only<2-3>{\begin{textblock}{10.2}(0.3,3.65)
+\only<2-3>{\begin{textblock}{10.2}(0.3,3.6)
 \begin{block}{Anomaly score distribution: $S \sim \frac12 \chi^2_1 + c$}
 \centerline{$\displaystyle s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = \frac{1}{2}\left(\frac{y_t - \mu_t}{2\sigma}\right)^2 + \frac{1}{2}\log(2\pi\sigma^2)$}
 \end{block}
@@ -94,8 +106,8 @@ For each $t$:
 * Estimate one-step forecast density: $f(y_t | y_1,\dots,y_{t-1})$.
 * Anomaly score: $s_{t} = -\log\hat{f}(y_{t}| y_1,\dots,y_{t-1})$.
 * High anomaly score indicates potential anomaly.
-* Fit a Generalized Pareto Distribution to the top 5% of anomaly scores seen so far.
-* $y_t$ is anomaly if $P(S > s_t) < 0.01$ under GPD.
+* Fit a Generalized Pareto Distribution to the top 10% of anomaly scores seen so far.
+* $y_t$ is anomaly if $P(S > s_t) < 0.05$ under GPD.
 
 ## Example
 
@@ -121,15 +133,17 @@ fc |> autoplot(a12)
 #| echo: false
 #| eval: true
 #| fig-height: 3.6
-fc |> 
-  autoplot(a12) + 
-  labs(y = "Scripts (thousands)",
-       title = "Forecast of A12 scripts: Feb 2006") +
+fc |>
+  autoplot(a12) +
+  labs(
+    y = "Scripts (thousands)",
+    title = "Forecast of A12 scripts: Feb 2006"
+  ) +
   theme(legend.position = "none") +
-  ylim(35,145)
+  ylim(35, 145)
 ```
 
-\only<3>{\begin{textblock}{10.4}(2.1,3.6)\fontsize{12}{13}\sf
+\only<3>{\begin{textblock}{10}(2.1,3.6)\fontsize{12}{13}\sf
 \begin{alertblock}{}
 Forecast distribution:\hfill $N(70.5, 3.9^2)$
 \end{alertblock}
@@ -146,7 +160,7 @@ Forecast distribution:\hfill $N(70.5, 3.9^2)$
 a12 <- pbs |> filter(ATC2 == "A12", Month <= yearmonth("2006 Jan"))
 a12plus <- pbs |> filter(ATC2 == "A12", Month <= yearmonth("2006 Feb"))
 fc <- a12 |> model(ets = ETS(Scripts)) |> forecast(h = 1)
-fc |> autoplot(a12plus) 
+fc |> autoplot(a12plus)
 ```
 
 ```{r}
@@ -154,20 +168,22 @@ fc |> autoplot(a12plus)
 #| echo: false
 #| eval: true
 #| fig-height: 3.6
-fc |> 
-  autoplot(a12plus) + 
-  labs(y = "Scripts (thousands)",
-       title = "Forecast of A12 scripts: Feb 2006") +
+fc |>
+  autoplot(a12plus) +
+  labs(
+    y = "Scripts (thousands)",
+    title = "Forecast of A12 scripts: Feb 2006"
+  ) +
   theme(legend.position = "none") +
-  ylim(35,145)
+  ylim(35, 145)
 ```
 
-\begin{textblock}{10.4}(2.1,3.6)\fontsize{12}{13}\sf
+\begin{textblock}{10}(2.1,3.6)\fontsize{12}{13}\sf
 \begin{alertblock}{}
 Forecast distribution:\hfill $N(70.5, 3.9^2)$\only<2>{\\
 Actual:\hfill $y_t = 36.4$\\
-Anomaly score:\hfill $s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = 40.8$
-Probability not an anomaly:\hfill $P(S > s_t | S > q_{0.95}) = 0.0377$}
+Anomaly score:\hfill $s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = 40.8$ \\
+Probability not an anomaly:\hfill $P(S > s_t) = 0.0377$}
 \end{alertblock}
 \end{textblock}
 
@@ -233,10 +249,12 @@ pbs_fc
 #| eval: false
 pbs_scores <- pbs_fc |>
   left_join(pbs |> rename(actual = Scripts), by = c("ATC2", "Month")) |>
+  group_by(.id) |>
   mutate(
-    s = -log_likelihood(Scripts, actual), # Density scores
-    prob = lookout(density_scores = s)    # Probability not an anomaly
-  )
+    s = -log_likelihood(Scripts, actual),
+    prob = lookout(density_scores = s, threshold = 0.9)
+  ) |>
+  ungroup()
 ```
 
 ```{r}
@@ -250,7 +268,7 @@ pbs_scores
 
 ```{r}
 #| label: pbs_scores3
-pbs_scores |> filter(prob < 0.01)
+pbs_scores |> filter(prob < 0.05)
 ```
 
 ## PBS anomalies
@@ -304,9 +322,21 @@ For each $t$:
 * Estimate one-step forecast density: $f(y_t | y_1,\dots,y_{t-1})$.
 * Anomaly score: $s_{t} = -\log\hat{f}(y_{t}| y_1,\dots,y_{t-1})$.
 * High anomaly score indicates potential anomaly.
-* Fit a Generalized Pareto Distribution to the top 5% of anomaly scores seen so far.
-* $y_t$ is anomaly if $P(S > s_t) < 0.01$ under GPD. 
-* **If $y_t$ is anomaly, set $y_t$ to missing for next iteration**.
+* Fit a Generalized Pareto Distribution to the top 10% of anomaly scores seen so far.
+* $y_t$ is anomaly if $P(S > s_t) < 0.05$ under GPD. 
+* **If $y_t$ is anomaly, set $y_t$ to missing**.
+* **Repeat**
+
+## Anomaly detection paradigms
+
+\begin{textblock}{7.2}(0.1,1.1)
+\fontsize{13}{15}\sf
+\begin{enumerate}\tightlist\itemsep=0.2cm
+\item Identify anomalies within a time series in real time: use one-step forecast distributions
+\item \only<2>{\textcolor{Orange}}{Identify anomalies within a time series in historical data: use residual distributions}
+\item Identify an anomalous time series in a collection of time series: use feature-based approach
+\end{enumerate}
+\end{textblock}
 
 ## Example: French mortality
 
@@ -314,43 +344,37 @@ For each $t$:
 #| label: fr_mortality
 fr_mortality
 ```
+
 ## Example: French mortality
 
 ```{r}
-#| echo: true
-#| eval: false
-fr_stretch <- fr_mortality |> stretch_tsibble(.init = 30, .step=1)
-```
-
-```{r}
-#| label: fr_stretch
+#| label: fr_mortality_time_plots
 #| echo: false
-tar_read(fr_stretch)
+fr_mortality |>
+  ggplot(aes(x = Year, y = Mortality, color = as.factor(Age), group = Age)) +
+  geom_line() +
+  facet_grid(. ~ Sex) +
+  scale_y_log10() +
+  theme(legend.position = "none")
 ```
+
 
 ## Example: French mortality
 
 ```{r}
 #| echo: true
 #| eval: false
-fit <- fr_stretch |> model(arima = ARIMA(Mortality))
-fc <- forecast(fit, h = 1)
-fr_scores <- fc |> 
-  select(Year, Age, Sex, Mortality) |>
-  left_join(fr_mortality |> rename(actual = Mortality)) |>
+fr_fit <- fr_mortality |> model(arima = ARIMA(log(Mortality)))
+fr_sigma <- augment(fr_fit) |> 
+  group_by(Age, Sex) |>
+  summarise(sigma = sd(.innov, na.rm = TRUE), .groups = "drop")
+fr_scores <- augment(fr_fit) |>
+  left_join(fr_sigma) |>
   mutate(
-    s = -log_likelihood(Mortality, actual), # Density scores
-    prob = lookout(density_scores = s)    # Probability not an anomaly
+    s = -log(dnorm(.innov / sigma)),
+    prob = lookout(density_scores = s, threshold_probability = 0.9)
   )
 ```
-
-```{r}
-#| label: fr_scores2
-#| echo: false
-#| eval: true
-fr_scores
-```
-
 
 ## Example: French mortality
 
@@ -375,14 +399,16 @@ tar_read(fr_anomalies_plot)
 tar_read(fr_anomalies_plot2)
 ```
 
-## Example: French mortality
+## More information
 
-```{r}
-#| label: fr_scores6
-#| echo: false
-fr_mortality |>
-  filter(Age == 25) |>
-  select(-Age) |>
-  autoplot(Mortality) +
-  geom_point(data = tar_read(fr_anomalies) |> filter(Age == 25))
-```
+\placefig{1}{1.2}{width=2.5cm}{fable}
+\placefig{3.5}{1.2}{width=2.5cm}{weird}
+
+\vspace*{5cm}
+
+\begin{alertblock}{}
+\begin{itemize}\tightlist
+\item \textbf{Slides}: \href{https://robjhyndman.com/isf2024}{robjhyndman.com/isf2024}
+\item \textbf{Incomplete book}: \href{https://OTexts.com/weird}{OTexts.com/weird}
+\end{itemize}
+\end{alertblock}
