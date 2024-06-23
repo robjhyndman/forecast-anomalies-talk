@@ -27,7 +27,9 @@ library(knitr)
 library(targets)
 library(fpp3)
 tar_load(c("pbs", "pbs_stretch", "pbs_fit", "pbs_fc", "pbs_scores"))
-tar_load(c("fr_mortality", "fr_scores"))
+tar_load(c("fr_mortality", "fr_scores", "fr_anomalies"))
+# Add graphics files to ensure dependency
+tar_load(c("paradigm1","paradigm2","paradigm3","n01","as","ase"))
 
 # Colours to be viridis for continuous scales and Okabe for discrete scales
 options(
@@ -47,12 +49,12 @@ ggplot2::theme_set(ggplot2::theme_get() + ggplot2::theme(text = ggplot2::element
 
 \begin{textblock}{7.2}(0.1,1.1)
 \fontsize{13}{15}\sf
-\begin{enumerate}\tightlist\itemsep=0.4cm
-\item \only<4>{\textcolor{Orange}}{\textbf{Identify anomalies within a time series in real time}:\newline 
+\begin{enumerate}\tightlist\itemsep=0.2cm
+\item \only<4>{\textcolor{Orange}}{\textbf{Identify anomalies within a time series in real time}:\newline
   use one-step forecast distributions}
-\only<2-4>{\item \textbf{Identify anomalies within a time series in historical data}:\newline 
-  use residual distributions}
-\only<3-4>{\item \textbf{Identify an anomalous time series in a collection of time series}:\newline 
+\only<2-4>{\item \textbf{Identify anomalies within a time series in historical data}:\newline
+  use residual distributions from smoothing method}
+\only<3-4>{\item \textbf{Identify an anomalous time series in a collection of time series}:\newline
   use feature-based approach}
 \end{enumerate}
 \end{textblock}
@@ -140,14 +142,7 @@ fc |> autoplot(a12)
 #| echo: false
 #| eval: true
 #| fig-height: 3.6
-fc |>
-  autoplot(a12) +
-  labs(
-    y = "Scripts (thousands)",
-    title = "Forecast of A12 scripts: Feb 2006"
-  ) +
-  theme(legend.position = "none") +
-  ylim(35, 145)
+tar_read(a12plot1)
 ```
 
 \only<3>{\begin{textblock}{10}(2.1,3.6)\fontsize{12}{13}\sf
@@ -175,14 +170,7 @@ fc |> autoplot(a12plus)
 #| echo: false
 #| eval: true
 #| fig-height: 3.6
-fc |>
-  autoplot(a12plus) +
-  labs(
-    y = "Scripts (thousands)",
-    title = "Forecast of A12 scripts: Feb 2006"
-  ) +
-  theme(legend.position = "none") +
-  ylim(35, 145)
+tar_read(a12plot2)
 ```
 
 \begin{textblock}{10}(2.1,3.6)\fontsize{12}{13}\sf
@@ -301,7 +289,7 @@ tar_read(n07)
 \end{itemize}
 \end{alertblock}
 \end{textblock}
-}   
+}
 
 
 
@@ -320,30 +308,25 @@ tar_read(r06)
 \end{itemize}
 \end{alertblock}
 \end{textblock}
-}   
-
-## Modified anomaly detection algorithm
-
-For each $t$:
-
-* Estimate one-step forecast density: $f(y_t | y_1,\dots,y_{t-1})$.
-* Anomaly score: $s_{t} = -\log\hat{f}(y_{t}| y_1,\dots,y_{t-1})$.
-* High anomaly score indicates potential anomaly.
-* Fit a Generalized Pareto Distribution to the top 10% of anomaly scores seen so far.
-* $y_t$ is anomaly if $P(S > s_t) < 0.05$ under GPD. 
-* **If $y_t$ is anomaly, set $y_t$ to missing**.
-* **Repeat**
+}
 
 ## Time series anomaly detection paradigms
 
 \begin{textblock}{7.2}(0.1,1.1)
 \fontsize{13}{15}\sf
 \begin{enumerate}\tightlist\itemsep=0.2cm
-\item \textbf{Identify anomalies within a time series in real time}: use one-step forecast distributions
-\item \only<2>{\textcolor{Orange}}{\textbf{Identify anomalies within a time series in historical data}: use residual distributions}
-\item \textbf{Identify an anomalous time series in a collection of time series}: use feature-based approach
+\item {\textbf{Identify anomalies within a time series in real time}:\newline
+  use one-step forecast distributions}
+\item \only<2>{\textcolor{Orange}}{\textbf{Identify anomalies within a time series in historical data}:\newline
+  use residual distributions from smoothing method}
+\item \textbf{Identify an anomalous time series in a collection of time series}:\newline
+  use feature-based approach
 \end{enumerate}
 \end{textblock}
+\placefig{7.5}{1.2}{width = 8.6cm, height = 2.4cm, keepaspectratio = false}{figures/paradigm1.png}
+\placefig{7.5}{3.9}{width = 8.6cm, height = 2.4cm, keepaspectratio = false}{figures/paradigm2.png}
+\placefig{7.5}{6.5}{width = 8.6cm, height = 2.4cm, keepaspectratio = false}{figures/paradigm3.png}
+
 
 ## Example: French mortality
 
@@ -357,12 +340,7 @@ fr_mortality
 ```{r}
 #| label: fr_mortality_time_plots
 #| echo: false
-fr_mortality |>
-  ggplot(aes(x = Year, y = Mortality, color = as.factor(Age), group = Age)) +
-  geom_line() +
-  facet_grid(. ~ Sex) +
-  scale_y_log10() +
-  theme(legend.position = "none")
+tar_read(fr_mortality_time_plots)
 ```
 
 
@@ -371,10 +349,13 @@ fr_mortality |>
 ```{r}
 #| echo: true
 #| eval: false
-fr_fit <- fr_mortality |> model(arima = ARIMA(log(Mortality)))
-fr_sigma <- augment(fr_fit) |> 
+fr_fit <- fr_mortality |> 
+  model(stl = STL(log(Mortality)))
+
+fr_sigma <- augment(fr_fit) |>
   group_by(Age, Sex) |>
-  summarise(sigma = sd(.innov, na.rm = TRUE), .groups = "drop")
+  summarise(sigma = IQR(.innov)/1.349, .groups = "drop")
+
 fr_scores <- augment(fr_fit) |>
   left_join(fr_sigma) |>
   mutate(
@@ -406,10 +387,41 @@ tar_read(fr_anomalies_plot)
 tar_read(fr_anomalies_plot2)
 ```
 
+\def\frenchevents{\begin{textblock}{4.5}(-0.25,1.6)
+\fontsize{12}{14}\sf
+\begin{alertblock}{}
+\begin{itemize}\parskip=0cm\itemsep=5pt
+\item 1870--1872: Franco-Prussian war and repression of the ‘Commune de Paris’ 
+\item 1914--1918: World War I
+\item 1918: Spanish flu
+\item 1939--1945: World War II
+\end{itemize}
+\end{alertblock}
+\end{textblock}}
+\only<2>{\frenchevents}
+
+## Example: French mortality
+
+```{r}
+#| label: fr_scores6
+#| echo: false
+tar_read(fr_anomalies_plot3)
+```
+
+\frenchevents
+
+## Example: French mortality
+
+```{r}
+#| label: fr_25
+#| echo: false
+tar_read(fr_25)
+```
+
 ## More information
 
-\placefig{1}{1.2}{width=2.5cm}{fable}
-\placefig{3.5}{1.2}{width=2.5cm}{weird}
+\placefig{1}{1.2}{width=3.5cm}{fable}
+\placefig{4.5}{1.2}{width=3.5cm}{weird}
 
 \vspace*{5cm}
 
