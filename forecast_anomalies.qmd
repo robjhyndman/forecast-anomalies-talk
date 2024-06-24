@@ -420,18 +420,23 @@ tar_read(fr_25)
 
 ## More information
 
-\placefig{1}{1.2}{width=3.5cm}{fable}
-\placefig{4.5}{1.2}{width=3.5cm}{weird}
+\placefig{1}{1.35}{width=3.5cm}{fable}
+\placefig{4.5}{1.35}{width=3.5cm}{weird}
 
-\only<2->{\begin{textblock}{8.8}(0.2,5.8)
+\only<2->{\begin{textblock}{8.8}(0.3,5.7)
 \begin{alertblock}{}\fontsize{14}{17}\sf
-\textbf{Slides}: \href{https://robjhyndman.com/isf2024}{robjhyndman.com/isf2024}
+\textbf{Slides}: \hfill\href{https://robjhyndman.com/isf2024}{robjhyndman.com/isf2024}
 
-\textbf{Incomplete book}: \href{https://OTexts.com/weird}{OTexts.com/weird}
+\textbf{Incomplete book}: \hfill\href{https://OTexts.com/weird}{OTexts.com/weird}
+
+\textbf{fable}: \hfill\href{https://fable.tidyverts.org}{fable.tidyverts.org}
+
+\textbf{weird}: \hfill\href{https://pkg.robjhyndman.com/weird}{pkg.robjhyndman.com/weird}
+
 \end{alertblock}
 \end{textblock}}
 
-\only<3->{\begin{textblock}{6.1}(9.7,5.8)
+\only<3->{\begin{textblock}{6.1}(9.6,5.7)
 \fontsize{12}{13}\sf
 \begin{block}{Find me at ...}
 \href{https://robjhyndman.com}{\faicon{home} robjhyndman.com}
