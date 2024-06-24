@@ -4,7 +4,7 @@ author: Rob J Hyndman
 date: 3 July 2024
 titlegraphic: bg-06.png
 toc: false
-abstract: When a forecast is very inaccurate, it is sometimes because a poor forecasting model is used, but it can also occur when an unusual observation occurs. I will discuss the latter situation, where a good forecasting model can be used to identify anomalies. The approach taken is to use a probabilistic forecast, and to compute the "density scores" equal to the negative log likelihood of the observations based on the forecast distributions. The density scores provide a measure of how anomalous each observation is, given the forecast density. A large density score indicates that the observation is unlikely, and so is a potential anomaly. On the other hand, typical values will have low density scores. A Generalized Pareto Distribution is fitted to the largest density scores to estimate the probability of each observation being an anomaly.  Applications to tourism numbers and mortality data will be used to illustrate the ideas using the weird R package.
+abstract: When a forecast is very inaccurate, it is sometimes because a poor forecasting model is used, but it can also occur when an unusual observation occurs. I will discuss the latter situation, where a good forecasting model can be used to identify anomalies. The approach taken is to use a probabilistic forecast, and to compute the "density scores" equal to the negative log likelihood of the observations based on the forecast distributions. The density scores provide a measure of how anomalous each observation is, given the forecast density. A large density score indicates that the observation is unlikely, and so is a potential anomaly. On the other hand, typical values will have low density scores. A Generalized Pareto Distribution is fitted to the largest density scores to estimate the probability of each observation being an anomaly. Applications to tourism numbers and mortality data will be used to illustrate the ideas using the weird R package.
 format:
   presentation-beamer:
     template-partials:
@@ -349,7 +349,7 @@ tar_read(fr_mortality_time_plots)
 ```{r}
 #| echo: true
 #| eval: false
-fr_fit <- fr_mortality |> 
+fr_fit <- fr_mortality |>
   model(stl = STL(log(Mortality)))
 
 fr_sigma <- augment(fr_fit) |>
@@ -391,7 +391,7 @@ tar_read(fr_anomalies_plot2)
 \fontsize{12}{14}\sf
 \begin{alertblock}{}
 \begin{itemize}\parskip=0cm\itemsep=5pt
-\item 1870--1872: Franco-Prussian war and repression of the ‘Commune de Paris’ 
+\item 1870--1872: Franco-Prussian war and repression of the ‘Commune de Paris’
 \item 1914--1918: World War I
 \item 1918: Spanish flu
 \item 1939--1945: World War II
@@ -423,11 +423,23 @@ tar_read(fr_25)
 \placefig{1}{1.2}{width=3.5cm}{fable}
 \placefig{4.5}{1.2}{width=3.5cm}{weird}
 
-\vspace*{5cm}
+\only<2->{\begin{textblock}{8.8}(0.2,5.8)
+\begin{alertblock}{}\fontsize{14}{17}\sf
+\textbf{Slides}: \href{https://robjhyndman.com/isf2024}{robjhyndman.com/isf2024}
 
-\begin{alertblock}{}
-\begin{itemize}\tightlist
-\item \textbf{Slides}: \href{https://robjhyndman.com/isf2024}{robjhyndman.com/isf2024}
-\item \textbf{Incomplete book}: \href{https://OTexts.com/weird}{OTexts.com/weird}
-\end{itemize}
+\textbf{Incomplete book}: \href{https://OTexts.com/weird}{OTexts.com/weird}
 \end{alertblock}
+\end{textblock}}
+
+\only<3->{\begin{textblock}{6.1}(9.7,5.8)
+\fontsize{12}{13}\sf
+\begin{block}{Find me at ...}
+\href{https://robjhyndman.com}{\faicon{home} robjhyndman.com}
+
+\href{https://twitter.com/robjhyndman}{\faicon{twitter} @robjhyndman}
+
+\href{https://github.com/robjhyndman}{\faicon{github}  @robjhyndman}
+
+\href{mailto:rob.hyndman@monash.edu}{\faicon{envelope} rob.hyndman@monash.edu}
+\end{block}
+\end{textblock}}
