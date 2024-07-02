@@ -192,7 +192,6 @@ list(
     name = pbs_scores,
     command = pbs_fc |>
       left_join(pbs |> rename(actual = Scripts), by = c("ATC2", "Month")) |>
-      group_by(.id) |>
       mutate(
         s = -log_likelihood(Scripts, actual),
         prob = lookout(density_scores = s, threshold = 0.9)
@@ -229,11 +228,10 @@ list(
     name = fr_mortality_time_plots,
     command = fr_mortality |>
       ggplot(aes(x = Year, y = Mortality,
-                 color = as.factor(Age), group = Age)) +
+                 color = Age, group = Age)) +
       geom_line() +
       facet_grid(. ~ Sex) +
-      scale_y_log10() +
-      theme(legend.position = "none")
+      scale_y_log10() 
   ),
   tar_target(
     name = fr_fit,
@@ -241,15 +239,19 @@ list(
       model(stl = STL(log(Mortality)))
   ),
   tar_target(
+    name = fr_augment,
+    command = augment(fr_fit)
+  ),
+  tar_target(
     name = fr_sigma,
-    command = augment(fr_fit) |>
+    command = fr_augment |>
       as_tibble() |>
       group_by(Age, Sex) |>
       summarise(sigma = IQR(.innov) / 1.349, .groups = "drop")
   ),
   tar_target(
     name = fr_scores,
-    command = augment(fr_fit) |>
+    command = fr_augment |>
       as_tibble() |>
       left_join(fr_sigma) |>
       mutate(

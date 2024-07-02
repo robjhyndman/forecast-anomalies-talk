@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|971e63c0e227fd66|||||||||||||||
+.Random.seed|object|c29fe48194b24f06|||||||||||||||
 a12|stem|74f1c46ba69560e1|0217576ac4093750|d21e0d43b5d51aa2|298810960||t19897.5390838071s|360264ffca5466fb|2296|rds|local|vector|||0.041||
 a12plot|stem|171c0acd9ce0bbf0|ff873a116f6f142f|5f01009514f5fb8c|-2033150668||t19897.3109047182s|090978d76986b237|1035255|rds|local|vector|||0.009||
 a12plot1|stem|56dbd1440c553de6|4ef894f0808f875d|8c28e66f1a55528b|793370731||t19897.5390982057s|e66c95d5032f7534|1324448|rds|local|vector|||0.091||
@@ -18,22 +18,23 @@ fr_anomalies_plot_male|stem|5e107da59edcf7b5|c1d77bd031f0e481|1eb44e045afd2fc5|1
 fr_anomalies_plot_male2|stem|9f1e07e8933c0deb|b24d7ca30b86e8a7|1eb44e045afd2fc5|527699555||t19897.5503745548s|14ce35bb73b80d3e|1033278|rds|local|vector|||0.087||
 fr_anomalies_plot2|stem|aef9f3ed467fb19e|b3016d2234fd7648|4c440e9decb7499d|-1111146277||t19897.5503829809s|1e5546cd396141ce|1194622|rds|local|vector|||0.016||
 fr_anomalies_plot3|stem|1d8ca57d19c40c67|4c785429507eb5e1|4c440e9decb7499d|1732532745||t19897.5573784175s|d3458d665a41449d|3099307|rds|local|vector|||0.027||
+fr_augment|stem|04641ceef56d4e98|4666717c958d9bf7|0d618cec1fed6a74|-1406091398||t19906.9270078616s|a9d21ffba922e6cf|966893|rds|local|vector|||5.668||
 fr_fit|stem|35a65f5ec3908667|10831999a23084bc|3f7cb0935ba8550f|-876320397||t19897.5319993402s|4c37fcd8a001f36e|1134355|rds|local|vector|||1.214||
 fr_fit2|stem|8ecc2f1400337342|d21c0f9ee9cdb6de|9f2a3c72760b2d3b|-1990254971||t19897.5231530623s|1147d79a9673af7b|1548498|rds|local|vector|||11.268||
 fr_mortality|stem|4ca0690034096c94|ec4243a1bc9b97c7|2c530c1562a7fbd1|1658610472||t19897.1148540363s|8d6c4284b8c3e3c1|246367|rds|local|vector|||2.031|Cannot recompute rates for Mortality. Using upper age value.|
-fr_mortality_time_plots|stem|e85e492eba06225b|d2e0e9d086d0bf64|3f7cb0935ba8550f|1761503410||t19897.539083159s|55f8debac5fa63b6|2129916|rds|local|vector|||0.063||
+fr_mortality_time_plots|stem|69cd8f321a444285|6b78ca761dce33e2|3f7cb0935ba8550f|1761503410||t19906.9285034965s|93277c56c61ec8d4|2116961|rds|local|vector|||0.151||
 fr_mortality2|stem|0badbf714fc19d2a|53824b2119a46c97|9f628cceabdf8423|491550936||t19897.5230206047s|dc7bf69405a5de62|273798|rds|local|vector|||0.083||
-fr_scores|stem|d6811d5003675702|be21bc1072cf2599|358fa8a29d6b4dad|676792527||t19897.5320406377s|1bf6cbc06957256d|684185|rds|local|vector|||1.766||
+fr_scores|stem|d6811d5003675702|75c7cc31345f1f21|ed00e3497265246a|676792527||t19906.9270129079s|1bf6cbc06957256d|684185|rds|local|vector|||0.222||
 fr_scores2|stem|5db7112a0c076b93|ace7dca98622402c|8275eec8a05f0b44|2065892696||t19897.5232477873s|9ecf550e81750be1|1167650|rds|local|vector|||2.025||
 fr_sd|stem|11e8d605ee9b8aed|36b2c99da9293c4b|5f1f0de55dcf55f9|-1570092279||t19897.0107557201s|82fa74b497b48a03|1719|rds|local|vector|||3.119||
 fr_sd2|stem|d8820695fc5d5fac|622cf820566fadb5|0c18848e08fd0d61|85253396||t19897.0111345683s|82fa74b497b48a03|1719|rds|local|vector|||2.942||
-fr_sigma|stem|9c2c709283041914|d499551153d7b25f|0d618cec1fed6a74|378549849||t19897.5320196186s|fda4a1017060b28f|1724|rds|local|vector|||1.732||
+fr_sigma|stem|9c2c709283041914|1d5c956d77e6969a|f4c7218268ea2937|378549849||t19906.9270087412s|fda4a1017060b28f|1724|rds|local|vector|||0.049||
 fr_sigma2|stem|6deadac3be41922a|a5f0747722f3ed11|166585901c910905|-702713567||t19897.5232073232s|8282224de3c290c3|1722|rds|local|vector|||1.834||
 fr_stretch|stem|ca84224c4eb7881f|eeb05383f2d9dfbe|878710a5582b10ce|1609348365||t19896.3986964352s|cf68abce9deeb903|32855804|rds|local|vector|||3.3||
 ggfont|stem|71d23d988918cfc8|a10fe2513b67408b|2c530c1562a7fbd1|833183125||t19896.4851938503s|cb5de256bff6bdf1|247|rds|local|vector|||0.001||
-l03|stem|8e1a50e45c7a5be8|f6ce4f9168f2a660|76b5b833ee814286|-1486535686||t19897.1880882902s|aace3e60703bb22a|2520450|rds|local|vector|||0.018||
+l03|stem|a232693f59811886|f6ce4f9168f2a660|cae8a27cdc895562|-1486535686||t19906.9110794674s|b003bd6b0758f82f|1104537|rds|local|vector|||0.198||
 n01|stem|b63661ded051bae9|46aea86da411a30f|565a2abcaefec778|-1019364803||t19897.4345996636s|06076334cca59fe3|113|rds|local|vector|||0.227||
-n07|stem|db7f744f0a770376|c458612c5e5251d6|76b5b833ee814286|-836811707||t19897.1880968547s|4a57ec5f71a6f4e9|2524302|rds|local|vector|||0.025||
+n07|stem|9e378f7e915805b2|c458612c5e5251d6|cae8a27cdc895562|-836811707||t19906.9110923836s|65f84d610cea60d8|1106536|rds|local|vector|||0.098||
 p1|stem|02516fa8e020f70b|b7a7ab10ae7eb997|96b5f4a261d47b3d|-1214752487||t19897.3109080977s|2ad903d558df1dec|944629|rds|local|vector|||0.006||
 p2|stem|1b042704b421bcc5|99c77eed0d8e1d47|bcf74d35b974decc|-1115163850||t19897.3109115236s|bb3c155cfd8af6fa|954040|rds|local|vector|||0.016||
 p3|stem|764454cf3d14f32e|f226ecdff08165e0|bcf74d35b974decc|-2073728870||t19897.3109158753s|3104e0d54b8f3c4a|1156017|rds|local|vector|||0.009||
@@ -44,15 +45,15 @@ paradigm2_plot|stem|113161244d529427|9dfd262d407354f2|3f7cb0935ba8550f|-14505238
 paradigm3|stem|f53dc917fbba4c68|5be266777b80155d|2811d557e39c1f16|1726848185||t19897.434589525s|98a5f1f3760c49be|118|rds|local|vector|||0.275||
 paradigm3_plot|stem|0d074dc9cefb5728|be314e3e7dc9555f|3f7cb0935ba8550f|-828340510||t19897.3107975917s|ed8e741a2cadef51|1364331|rds|local|vector|||0.037||
 pbs|stem|acc4b63a1d70c9e2|7550b5ddb061d0e4|2c530c1562a7fbd1|-1178698041||t19896.4851955632s|02f1575b58429bd5|100773|rds|local|vector|||0.432||
-pbs_anomalies|stem|d5cee878c6e22f40|d6087b456b6c2c20|aa48c339438a70f6|872632678||t19897.1880599578s|7cfa5dfc0e537f73|8038|rds|local|vector|||0.006||
+pbs_anomalies|stem|3ad34963893e8d22|d6087b456b6c2c20|0f014f02d3ac3d31|872632678||t19906.9110643754s|2d7c8564fb3dee99|3974|rds|local|vector|||0.023||
 pbs_fc|stem|d4bcbbff1092cc39|78fdf610a608f505|cdfb777fc48922b0|-699457591||t19897.1879400547s|d76a32f3777baf45|300799|rds|local|vector|||113.955||
 pbs_fit|stem|e273ba5f79a8e526|de827f06242d425c|4a5ac23ec0f6987a|2057020350||t19897.1865954763s|2cc61fc44d7fe4f0|86137304|rds|local|vector|||6179.867||
 pbs_plot|function|ffb47cbe2271f537|||||||||||||||
-pbs_scores|stem|9f7aa78d5468e2d1|5ebed62f1a351fe9|fd0192bba9333fbf|1788008389||t19897.1879494988s|911fa21aad36442f|472268|rds|local|vector|||0.673|There were 8 warnings in mutate.The first warning wasℹ In argument prob  lookoutdensity_scores  s, threshold  0.9.ℹ In group 18 .id  18.Caused by warning in fpot.norm optimization may not have succeededℹ Run dplyrlast_dplyr_warnings to see the 7 remaining warnings.|
+pbs_scores|stem|a95e9756c9bd302b|0ff7619ce7687e9d|fd0192bba9333fbf|1788008389||t19906.9110638662s|493700191a086c9a|472656|rds|local|vector|||1.427||
 pbs_stretch|stem|b4dc2307388c3124|cd5e3013e2910df6|d21e0d43b5d51aa2|626338625||t19896.4852540333s|66b621c2e0daf77d|9404791|rds|local|vector|||1.525||
-r06|stem|dd502b85d89b74a0|5a7e642ff24ad681|76b5b833ee814286|962212090||t19897.1881053266s|283ab03f7b978f92|2524665|rds|local|vector|||0.017||
+r06|stem|25a24b48e4ae9e8d|5a7e642ff24ad681|cae8a27cdc895562|962212090||t19906.9111044665s|afdd94de77d607a0|1106835|rds|local|vector|||0.053||
 savepng|function|21203d45d95ba678|||||||||||||||
-slides|stem|f169fe79f9906a08|fb6278b7f811d644|a8eb16b749da87c6|1331386099|forecast_anomalies_files*forecast_anomalies.pdf*forecast_anomalies.qmd*before-title.tex*figures/as.png*figures/ase.png*figures/fable.png*figures/n01.png*figures/paradigm1.png*figures/paradigm2.png*figures/paradigm3.png*figures/weird.png|t19898.1441248995s|f70abe5eb4bcf713|1627989|file|local|vector|||42.583||
+slides|stem|b8c2fdf87e6701b9|9d4d1e7d206d1655|6e7cf8a4926deeeb|1331386099|forecast_anomalies_files*forecast_anomalies.pdf*forecast_anomalies.qmd*before-title.tex*figures/as.png*figures/ase.png*figures/fable.png*figures/n01.png*figures/paradigm1.png*figures/paradigm2.png*figures/paradigm3.png*figures/weird.png|t19906.9318340145s|e7a769576b2fa2fc|1605534|file|local|vector|||57.623||
 tscv_plot|function|ccce9a7c8368bb6a|||||||||||||||
 tscvplot|stem|78f4118f20d09ee6|19d3d0263ca76100|a93b80aacc91ef72|772524094||t19897.3107931011s|aa00e23d3f8db4c8|1165344|rds|local|vector|||1.786||
 u|stem|5688488bb9695b49|b4d4fdbf94be21d3|2c530c1562a7fbd1|-2019597389||t19897.1148595916s|a33fb1da66f6e09f|55|rds|local|vector|||0||

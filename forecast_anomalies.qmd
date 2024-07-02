@@ -27,7 +27,7 @@ library(knitr)
 library(targets)
 library(fpp3)
 tar_load(c("pbs", "pbs_stretch", "pbs_fit", "pbs_fc", "pbs_scores"))
-tar_load(c("fr_mortality", "fr_scores", "fr_anomalies"))
+tar_load(c("fr_mortality", "fr_scores", "fr_anomalies", "fr_fit", "fr_augment"))
 # Add graphics files to ensure dependency
 tar_load(c("paradigm1","paradigm2","paradigm3","n01","as","ase"))
 
@@ -43,7 +43,6 @@ options(
 # Fira Sans font for graphics to match the main text
 ggplot2::theme_set(ggplot2::theme_get() + ggplot2::theme(text = ggplot2::element_text(family = "Fira Sans")))
 ```
-
 
 ## Time series anomaly detection paradigms
 
@@ -61,7 +60,6 @@ ggplot2::theme_set(ggplot2::theme_get() + ggplot2::theme(text = ggplot2::element
 \placefig{7.5}{1.2}{width = 8.6cm, height = 2.4cm, keepaspectratio = false}{figures/paradigm1.png}
 \only<2-4>{\placefig{7.5}{3.9}{width = 8.6cm, height = 2.4cm, keepaspectratio = false}{figures/paradigm2.png}}
 \only<3-4>{\placefig{7.5}{6.5}{width = 8.6cm, height = 2.4cm, keepaspectratio = false}{figures/paradigm3.png}}
-
 
 ## Australian PBS data
 
@@ -152,7 +150,6 @@ Forecast distribution:\hfill $N(70.5, 3.9^2)$
 \end{textblock}
 }
 
-
 ## Example
 
 ```{r}
@@ -178,7 +175,7 @@ tar_read(a12plot2)
 Forecast distribution:\hfill $N(70.5, 3.9^2)$\only<2>{\\
 Actual:\hfill $y_t = 36.4$\\
 Anomaly score:\hfill $s_t = -\log f(y_t | y_1,\dots,y_{t-1}) = 40.8$ \\
-Probability not an anomaly:\hfill $P(S > s_t) = 0.0377$}
+Probability not an anomaly:\hfill $P(S > s_t) = 0.0154$}
 \end{alertblock}
 \end{textblock}
 
@@ -244,12 +241,10 @@ pbs_fc
 #| eval: false
 pbs_scores <- pbs_fc |>
   left_join(pbs |> rename(actual = Scripts), by = c("ATC2", "Month")) |>
-  group_by(.id) |>
   mutate(
     s = -log_likelihood(Scripts, actual),
     prob = lookout(density_scores = s, threshold = 0.9)
-  ) |>
-  ungroup()
+  )
 ```
 
 ```{r}
@@ -259,7 +254,7 @@ pbs_scores <- pbs_fc |>
 pbs_scores
 ```
 
-## PBS anomalies
+## PBS anomalies 
 
 ```{r}
 #| label: pbs_scores3
@@ -277,38 +272,19 @@ tar_read(l03)
 ## PBS anomalies
 
 ```{r}
-#| label: pbs_scores5
-#| echo: false
-tar_read(n07)
-```
-
-\only<2>{\begin{textblock}{6.3}(2.1,1.8)\fontsize{12}{13}\sf
-\begin{alertblock}{What have we learned?}
-\begin{itemize}\tightlist
-\item Consecutive anomalies are hard to identify because the preceding anomalies corrupt the model.
-\end{itemize}
-\end{alertblock}
-\end{textblock}
-}
-
-
-
-## PBS anomalies
-
-```{r}
 #| label: pbs_scores6
 #| echo: false
 tar_read(r06)
 ```
 
-\only<2>{\begin{textblock}{6}(8.5,1.8)\fontsize{12}{13}\sf
-\begin{alertblock}{What have we learned?}
-\begin{itemize}\tightlist
-\item A sequence of near anomalies makes it hard to spot a true anomaly.
-\end{itemize}
-\end{alertblock}
-\end{textblock}
-}
+
+## PBS anomalies
+
+```{r}
+#| label: pbs_scores5
+#| echo: false
+tar_read(n07)
+```
 
 ## Time series anomaly detection paradigms
 
@@ -327,7 +303,6 @@ tar_read(r06)
 \placefig{7.5}{3.9}{width = 8.6cm, height = 2.4cm, keepaspectratio = false}{figures/paradigm2.png}
 \placefig{7.5}{6.5}{width = 8.6cm, height = 2.4cm, keepaspectratio = false}{figures/paradigm3.png}
 
-
 ## Example: French mortality
 
 ```{r}
@@ -343,7 +318,6 @@ fr_mortality
 tar_read(fr_mortality_time_plots)
 ```
 
-
 ## Example: French mortality
 
 ```{r}
@@ -351,11 +325,49 @@ tar_read(fr_mortality_time_plots)
 #| eval: false
 fr_fit <- fr_mortality |>
   model(stl = STL(log(Mortality)))
+```
 
+```{r}
+#| label: fr_fit
+fr_fit
+```
+
+## Example: French mortality
+
+```{r}
+#| echo: true
+#| eval: false
+augment(fr_fit)
+```
+
+```{r}
+#| echo: false
+#| eval: true
+fr_augment
+```
+
+## Example: French mortality
+
+```{r}
+#| echo: true
+#| eval: false
 fr_sigma <- augment(fr_fit) |>
   group_by(Age, Sex) |>
   summarise(sigma = IQR(.innov)/1.349, .groups = "drop")
+```
 
+```{r}
+#| echo: false
+#| eval: true
+tar_read(fr_sigma)
+```
+
+
+## Example: French mortality
+
+```{r}
+#| echo: true
+#| eval: false
 fr_scores <- augment(fr_fit) |>
   left_join(fr_sigma) |>
   mutate(
@@ -363,6 +375,13 @@ fr_scores <- augment(fr_fit) |>
     prob = lookout(density_scores = s, threshold_probability = 0.9)
   )
 ```
+
+```{r}
+#| echo: false
+#| eval: true
+fr_scores
+```
+
 
 ## Example: French mortality
 
